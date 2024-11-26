@@ -36,8 +36,7 @@ namespace ApplicationBook.Tests.Controllers
             // Arrange
             var authors = new List<Author>
             {
-                //new Author { Id = 1, FirstName = "Author 1", LastName = "AuthorLastname1" },
-                //new Author { Id = 2, FirstName = "Author 2",LastName = "AuthorLastname2"}
+
                 new Author(1, "Toby", "Goransson"),
                 new Author(2, "Toby2", "Goransson2"),
             };
@@ -62,7 +61,7 @@ namespace ApplicationBook.Tests.Controllers
             var authorId = 1;
             var existingAuthor = new Author(authorId, "John", "Doe");
 
-            // Mock: Returnera en författare när `GetAuthorByIdQuery` skickas
+            
             _mediatorMock
                 .Setup(m => m.Send(It.Is<GetAuthorByIdQuery>(q => q.Id == authorId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(existingAuthor);
@@ -71,38 +70,37 @@ namespace ApplicationBook.Tests.Controllers
             var result = await _controller.GetAuthorById(authorId);
 
             // Assert
-            Assert.IsNotNull(result); // Kontrollera att resultatet inte är null
+            Assert.IsNotNull(result); 
             var okResult = result.Result as OkObjectResult;
-            Assert.IsNotNull(okResult); // Kontrollera att det är ett OkObjectResult
-            Assert.AreEqual(200, okResult.StatusCode); // Kontrollera statuskoden
+            Assert.IsNotNull(okResult); 
+            Assert.AreEqual(200, okResult.StatusCode); 
             var returnedAuthor = okResult.Value as Author;
-            Assert.IsNotNull(returnedAuthor); // Kontrollera att författaren returneras
-            Assert.AreEqual(existingAuthor.Id, returnedAuthor.Id); // Kontrollera att rätt författare returneras
+            Assert.IsNotNull(returnedAuthor); 
+            Assert.AreEqual(existingAuthor.Id, returnedAuthor.Id);
         }
 
         [Test]
         public async Task GetAuthorById_ShouldReturnNotFound_WhenAuthorDoesNotExist()
         {
             // Arrange
-            var authorId = 99; // Ett ID som inte finns
+            var authorId = 99; 
             _mediatorMock
                 .Setup(m => m.Send(It.Is<GetAuthorByIdQuery>(q => q.Id == authorId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Author)null); // Mocka att ingen författare hittas
-
+                .ReturnsAsync((Author)null); 
             // Act
             var result = await _controller.GetAuthorById(authorId);
 
             // Assert
-            Assert.IsNotNull(result); // Kontrollera att resultatet inte är null
+            Assert.IsNotNull(result); 
             var notFoundResult = result.Result as NotFoundObjectResult;
-            Assert.IsNotNull(notFoundResult); // Kontrollera att det är ett NotFoundObjectResult
-            Assert.AreEqual(404, notFoundResult.StatusCode); // Kontrollera statuskoden
+            Assert.IsNotNull(notFoundResult); 
+            Assert.AreEqual(404, notFoundResult.StatusCode); 
 
-            // Kontrollera att felmeddelandet är korrekt
+            
             if (notFoundResult.Value is { } notFoundMessage)
             {
                 var message = notFoundMessage.ToString();
-                Assert.IsTrue(message.Contains("was not found")); // Kontrollera felmeddelandet
+                Assert.IsTrue(message.Contains("was not found")); 
             }
             else
             {
@@ -139,7 +137,7 @@ namespace ApplicationBook.Tests.Controllers
         public async Task CreateAuthor_ShouldReturnBadRequest_WhenFirstNameOrLastNameIsMissing()
         {
             // Arrange
-            var command = new CreateAuthorCommand("", ""); // Ogiltig inmatning
+            var command = new CreateAuthorCommand("", ""); 
 
             // Act
             var result = await _controller.CreateAuthor(command);
@@ -172,7 +170,7 @@ namespace ApplicationBook.Tests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateAuthorCommand>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Author)null); // Simulera att inget objekt skapas
+                .ReturnsAsync((Author)null); 
 
             // Act
             var result = await _controller.CreateAuthor(command);
@@ -212,7 +210,7 @@ namespace ApplicationBook.Tests.Controllers
         {
             // Arrange
             var authorId = 1;
-            var command = new UpdateAuthorCommand(2, "John", "Doe"); // Fel ID i kommandot
+            var command = new UpdateAuthorCommand(2, "John", "Doe"); 
 
             // Act
             var result = await _controller.UpdateAuthor(authorId, command);
@@ -228,8 +226,7 @@ namespace ApplicationBook.Tests.Controllers
         public async Task UpdateAuthor_ShouldReturnBadRequest_WhenFirstNameOrLastNameIsMissing()
         {
             // Arrange
-            var command = new UpdateAuthorCommand(1, "", ""); // Tomma namn
-
+            var command = new UpdateAuthorCommand(1, "", ""); 
             // Act
             var result = await _controller.UpdateAuthor(1, command);
 
@@ -248,11 +245,10 @@ namespace ApplicationBook.Tests.Controllers
         public async Task DeleteAuthor_ShouldReturnNoContent_WhenAuthorIsDeleted()
         {
             // Arrange
-            var authorId = 1; // Ett existerande ID
+            var authorId = 1;
             _mediatorMock
                 .Setup(m => m.Send(It.Is<DeleteAuthorCommand>(cmd => cmd.Id == authorId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new Author(authorId, "John", "Doe")); // Simulerar att författaren tas bort
-
+                .ReturnsAsync(new Author(authorId, "John", "Doe")); 
             // Act
             var result = await _controller.DeleteAuthor(authorId);
 
@@ -265,10 +261,10 @@ namespace ApplicationBook.Tests.Controllers
         public async Task DeleteAuthor_ShouldReturnNotFound_WhenAuthorDoesNotExist()
         {
             // Arrange
-            var authorId = 99; // Ett ID som inte finns
+            var authorId = 99;
             _mediatorMock
                 .Setup(m => m.Send(It.Is<DeleteAuthorCommand>(cmd => cmd.Id == authorId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Author)null); // Simulera att ingen författare hittas
+                .ReturnsAsync((Author)null); 
 
             // Act
             var result = await _controller.DeleteAuthor(authorId);
@@ -287,7 +283,7 @@ namespace ApplicationBook.Tests.Controllers
         public async Task DeleteAuthor_ShouldReturnBadRequest_WhenIdIsInvalid()
         {
             // Arrange
-            var invalidId = -1; // Ogiltigt ID
+            var invalidId = -1; 
 
             // Act
             var result = await _controller.DeleteAuthor(invalidId);

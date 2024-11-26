@@ -139,7 +139,7 @@ namespace Web_API.Tests.Controllers
             var bookIdToUpdate = 1;
             var updatedBook = new Book(bookIdToUpdate, "Updated Title", "Updated Description", new Author(1, "Toby", "Goransson"));
 
-            // Simulera att boken finns och att den uppdateras
+            
             _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateBookCommand>(), default))
                 .ReturnsAsync(updatedBook);
 
@@ -156,10 +156,10 @@ namespace Web_API.Tests.Controllers
         public async Task UpdateBook_ShouldReturnNotFound_WhenBookDoesNotExist()
         {
             // Arrange
-            var bookIdToUpdate = 999; // Ett ID som inte finns
+            var bookIdToUpdate = 999; 
             var updatedBook = new Book(bookIdToUpdate, "Updated Title", "Updated Description", new Author(1, "Toby", "Goransson"));
 
-            // Simulera att boken inte finns
+            
             _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateBookCommand>(), default))
                 .ThrowsAsync(new KeyNotFoundException($"Ingen bok hittades med ID {bookIdToUpdate}."));
 
@@ -202,7 +202,7 @@ namespace Web_API.Tests.Controllers
             var result = await _controller.DeleteBook(bookIdToDelete);
 
             // Assert
-            Assert.IsInstanceOf<NoContentResult>(result); // Verifiera att resultatet är NoContent (HTTP 204)
+            Assert.IsInstanceOf<NoContentResult>(result); 
         }
 
         [Test]
@@ -213,13 +213,13 @@ namespace Web_API.Tests.Controllers
 
             // Simulera att DeleteBookCommand returnerar en lista där boken inte finns
             _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteBookCommand>(), default))
-                .ReturnsAsync((List<Book>)null); // Simulerar att inget resultat hittas
+                .ReturnsAsync((List<Book>)null); 
 
             // Act
             var result = await _controller.DeleteBook(bookIdToDelete);
 
             // Assert
-            Assert.IsInstanceOf<NotFoundResult>(result); // Verifiera att resultatet är NotFound (HTTP 404)
+            Assert.IsInstanceOf<NotFoundResult>(result); 
         }
         [Test]
         public async Task CreateNewBook_ShouldAddBook_WhenValidBookIsProvided_And_return_List_Including_NewBook()
