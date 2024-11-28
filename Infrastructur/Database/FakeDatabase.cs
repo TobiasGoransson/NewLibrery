@@ -12,7 +12,8 @@ namespace Infrastructur.Database
     {
 
         public List<Book> Books { get { return allBooksFromDB; } set { allBooksFromDB = value; } }
-        public List<Author> Athors { get { return allAuthorsFromDB; } set { allAuthorsFromDB = value; } }
+        public List<Author> Authors { get { return allAuthorsFromDB; } set { allAuthorsFromDB = value; } }
+        public List<User> Users { get { return allUsersFromDB; } set { allUsersFromDB = value; } }
 
         private static List<Book> allBooksFromDB = new List<Book>
         {
@@ -28,12 +29,18 @@ namespace Infrastructur.Database
             return book;
         }
 
-        public List<Author> Authors { get { return allAuthorsFromDB; } set { allAuthorsFromDB = value; } }
-
         private static List<Author> allAuthorsFromDB = new List<Author>
         {
             new Author(1, "Toby", "Goransson"),
             new Author(2, "Toby2", "Goransson2"),
         };
+
+        private static List<User> allUsersFromDB = new List<User>
+        {
+            new User { UserId = Guid.NewGuid(), UserName = "BOB" }, 
+            new User { UserId = Guid.NewGuid(), UserName = "Sofie" },
+        };
+
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MediatR;
+using ApplicationBook.Users.Queries.LogIn.Helpers;
 
 
 namespace ApplicationBook
@@ -11,8 +12,8 @@ namespace ApplicationBook
             var assembly = typeof(DependencyInjection).Assembly;
 
             services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(assembly));
+            services.AddScoped<Tokenhelper>();
 
-           
 
             return services;
         }
