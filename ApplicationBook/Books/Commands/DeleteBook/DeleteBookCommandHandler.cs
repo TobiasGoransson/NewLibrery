@@ -1,13 +1,6 @@
-﻿using ApplicationBook.Books.Commands.CreateBook;
-using Domain;
-using MediatR;
-using Infrastructur;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain;
 using Infrastructur.Database;
+using MediatR;
 
 namespace ApplicationBook.Books.Commands.DeleteBook
 {
@@ -22,7 +15,7 @@ namespace ApplicationBook.Books.Commands.DeleteBook
 
         public Task<List<Book>> Handle(DeleteBookCommand request, CancellationToken cancellationToken)
         {
-            
+
             var bookToDelete = fakeDatabase.Books.FirstOrDefault(b => b.Id == request.bookId);
 
             if (bookToDelete == null)
@@ -30,10 +23,10 @@ namespace ApplicationBook.Books.Commands.DeleteBook
                 throw new KeyNotFoundException($"Ingen bok hittades med ID {request.bookId}.");
             }
 
-            
+
             fakeDatabase.Books.Remove(bookToDelete);
 
-            
+
             return Task.FromResult(fakeDatabase.Books);
         }
     }

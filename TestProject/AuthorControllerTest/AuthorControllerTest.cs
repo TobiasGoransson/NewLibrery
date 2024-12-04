@@ -1,15 +1,12 @@
-﻿using NUnit.Framework;
-using Moq;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using ApplicationBook.Authors.Commands.CreateAuthor;
-using ApplicationBook.Authors.Commands.UpdateAuthor;
+﻿using ApplicationBook.Authors.Commands.CreateAuthor;
 using ApplicationBook.Authors.Commands.DeleteAuthor;
+using ApplicationBook.Authors.Commands.UpdateAuthor;
 using ApplicationBook.Authors.Queries.GetAllAuthors;
 using ApplicationBook.Authors.Queries.GetAuthorById;
 using Domain;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
 
 
 namespace ApplicationBook.Tests.Controllers
@@ -61,7 +58,7 @@ namespace ApplicationBook.Tests.Controllers
             var authorId = 1;
             var existingAuthor = new Author(authorId, "John", "Doe");
 
-            
+
             _mediatorMock
                 .Setup(m => m.Send(It.Is<GetAuthorByIdQuery>(q => q.Id == authorId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(existingAuthor);
@@ -70,12 +67,12 @@ namespace ApplicationBook.Tests.Controllers
             var result = await _controller.GetAuthorById(authorId);
 
             // Assert
-            Assert.IsNotNull(result); 
+            Assert.IsNotNull(result);
             var okResult = result.Result as OkObjectResult;
-            Assert.IsNotNull(okResult); 
-            Assert.AreEqual(200, okResult.StatusCode); 
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult.StatusCode);
             var returnedAuthor = okResult.Value as Author;
-            Assert.IsNotNull(returnedAuthor); 
+            Assert.IsNotNull(returnedAuthor);
             Assert.AreEqual(existingAuthor.Id, returnedAuthor.Id);
         }
 
@@ -83,24 +80,24 @@ namespace ApplicationBook.Tests.Controllers
         public async Task GetAuthorById_ShouldReturnNotFound_WhenAuthorDoesNotExist()
         {
             // Arrange
-            var authorId = 99; 
+            var authorId = 99;
             _mediatorMock
                 .Setup(m => m.Send(It.Is<GetAuthorByIdQuery>(q => q.Id == authorId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Author)null); 
+                .ReturnsAsync((Author)null);
             // Act
             var result = await _controller.GetAuthorById(authorId);
 
             // Assert
-            Assert.IsNotNull(result); 
+            Assert.IsNotNull(result);
             var notFoundResult = result.Result as NotFoundObjectResult;
-            Assert.IsNotNull(notFoundResult); 
-            Assert.AreEqual(404, notFoundResult.StatusCode); 
+            Assert.IsNotNull(notFoundResult);
+            Assert.AreEqual(404, notFoundResult.StatusCode);
 
-            
+
             if (notFoundResult.Value is { } notFoundMessage)
             {
                 var message = notFoundMessage.ToString();
-                Assert.IsTrue(message.Contains("was not found")); 
+                Assert.IsTrue(message.Contains("was not found"));
             }
             else
             {
@@ -137,7 +134,7 @@ namespace ApplicationBook.Tests.Controllers
         public async Task CreateAuthor_ShouldReturnBadRequest_WhenFirstNameOrLastNameIsMissing()
         {
             // Arrange
-            var command = new CreateAuthorCommand("", ""); 
+            var command = new CreateAuthorCommand("", "");
 
             // Act
             var result = await _controller.CreateAuthor(command);
@@ -170,7 +167,7 @@ namespace ApplicationBook.Tests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateAuthorCommand>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Author)null); 
+                .ReturnsAsync((Author)null);
 
             // Act
             var result = await _controller.CreateAuthor(command);
@@ -210,7 +207,7 @@ namespace ApplicationBook.Tests.Controllers
         {
             // Arrange
             var authorId = 1;
-            var command = new UpdateAuthorCommand(2, "John", "Doe"); 
+            var command = new UpdateAuthorCommand(2, "John", "Doe");
 
             // Act
             var result = await _controller.UpdateAuthor(authorId, command);
@@ -226,7 +223,7 @@ namespace ApplicationBook.Tests.Controllers
         public async Task UpdateAuthor_ShouldReturnBadRequest_WhenFirstNameOrLastNameIsMissing()
         {
             // Arrange
-            var command = new UpdateAuthorCommand(1, "", ""); 
+            var command = new UpdateAuthorCommand(1, "", "");
             // Act
             var result = await _controller.UpdateAuthor(1, command);
 
@@ -248,7 +245,7 @@ namespace ApplicationBook.Tests.Controllers
             var authorId = 1;
             _mediatorMock
                 .Setup(m => m.Send(It.Is<DeleteAuthorCommand>(cmd => cmd.Id == authorId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new Author(authorId, "John", "Doe")); 
+                .ReturnsAsync(new Author(authorId, "John", "Doe"));
             // Act
             var result = await _controller.DeleteAuthor(authorId);
 
@@ -264,7 +261,7 @@ namespace ApplicationBook.Tests.Controllers
             var authorId = 99;
             _mediatorMock
                 .Setup(m => m.Send(It.Is<DeleteAuthorCommand>(cmd => cmd.Id == authorId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Author)null); 
+                .ReturnsAsync((Author)null);
 
             // Act
             var result = await _controller.DeleteAuthor(authorId);
@@ -275,15 +272,15 @@ namespace ApplicationBook.Tests.Controllers
             Assert.IsNotNull(notFoundResult);
             Assert.AreEqual(404, notFoundResult.StatusCode);
 
-            
-            
+
+
         }
 
         [Test]
         public async Task DeleteAuthor_ShouldReturnBadRequest_WhenIdIsInvalid()
         {
             // Arrange
-            var invalidId = -1; 
+            var invalidId = -1;
 
             // Act
             var result = await _controller.DeleteAuthor(invalidId);

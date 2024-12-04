@@ -34,7 +34,7 @@ namespace Web_API
                         IssuerSigningKey = new SymmetricSecurityKey(secretKey)
                     };
                 });
-
+            //Change for Pullrequest
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("Admin", policy =>
@@ -73,7 +73,13 @@ namespace Web_API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddApplication().AddInfrastructure();
+            builder.Services.AddApplication();
+
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            builder.Services.AddInfrastructure(connectionString);
+
+            
 
             var app = builder.Build();
 
