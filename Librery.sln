@@ -19,7 +19,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject", "TestProject\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructur", "Infrastructur\Infrastructur.csproj", "{C112840A-AC6F-45F2-8844-5230988488DB}"
 EndProject
+<<<<<<< Updated upstream
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web_API", "Web_API", "{0BF7D2C6-BED6-486A-9A91-B9DF28D3032C}"
+=======
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{0BF7D2C6-BED6-486A-9A91-B9DF28D3032C}"
+>>>>>>> Stashed changes
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
