@@ -1,21 +1,24 @@
-﻿using Domain;
-using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using Domain;
 using MediatR;
 
 namespace ApplicationBook.Authors.Queries.GetAllAuthors
 {
     public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IRepository<Author> _repository;
 
-        public GetAllAuthorsQueryHandler(FakeDatabase fakeDatabase)
+        public GetAllAuthorsQueryHandler(IRepository<Author> repository)
         {
-            _fakeDatabase = fakeDatabase;
+            _repository = repository;
         }
 
-        public Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+        public async Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_fakeDatabase.Authors);
+            // Hämta alla författare från repository
+            var authors = await _repository.GetAllAsync();
+            return authors ?? new List<Author>();
+
         }
     }
 }

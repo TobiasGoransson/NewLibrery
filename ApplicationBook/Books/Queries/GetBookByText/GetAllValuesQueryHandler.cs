@@ -1,25 +1,25 @@
-﻿using Domain;
-using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using Domain;
 using MediatR;
 
 namespace ApplicationBook.Books.Queries.GetBook
 {
     public class GetAllValuesQueryHandler : IRequestHandler<GetAllValuesQuery, List<Book>>
     {
-        private readonly FakeDatabase _database;
+        private readonly IRepository<Book> _repository;
 
-        public GetAllValuesQueryHandler(FakeDatabase database)
+        public GetAllValuesQueryHandler(IRepository<Book> repository)
         {
-            _database = database;
+            _repository = repository;
         }
 
         public async Task<List<Book>> Handle(GetAllValuesQuery request, CancellationToken cancellationToken)
         {
+            // Hämta alla böcker från repositoryn
+            var books = await _repository.GetAllAsync();
 
-            var books = _database.Books;
-
-            // Simulera asynkron hantering
-            return await Task.FromResult(books);
+            return books;
         }
     }
+
 }

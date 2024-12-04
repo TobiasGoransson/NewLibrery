@@ -1,29 +1,34 @@
-﻿using ApplicationBook.Users.Queries.LogIn.Helpers;
-using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using ApplicationBook.Users.Queries.LogIn.Helpers;
+using Domain;
 using MediatR;
 
 namespace ApplicationBook.Users.Queries.LogIn
 {
     internal class LogInUserQueryHandler : IRequestHandler<LogInUserQuery, string>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IUserRepository _userRepository;
         private readonly Tokenhelper _tokenhelper;
-        public LogInUserQueryHandler(FakeDatabase fakeDatabase, Tokenhelper tokenhelper)
+
+        public LogInUserQueryHandler(IUserRepository userRepository, Tokenhelper tokenhelper)
         {
-            _fakeDatabase = fakeDatabase;
+            _userRepository = userRepository;
             _tokenhelper = tokenhelper;
         }
 
-        public Task<string> Handle(LogInUserQuery request, CancellationToken cancellationToken)
+        public async Task<string> Handle(LogInUserQuery request, CancellationToken cancellationToken)
         {
-            var user = _fakeDatabase.Users.FirstOrDefault(u => u.UserName == request.LogInUser.UserName && u.Password == request.LogInUser.Password);
+            var user = await _userRepository.GetByCredentialsAsync(request.LogInUser.UserName, request.LogInUser.Password, cancellationToken);
 
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Invalid username or password");
             }
+
             string token = _tokenhelper.GenerateJwtToken(user);
-            return Task.FromResult(token);
+            return token;
         }
     }
+
+
 }

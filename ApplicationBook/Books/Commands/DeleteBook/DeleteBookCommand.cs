@@ -5,10 +5,10 @@ namespace ApplicationBook.Books.Commands.DeleteBook
 {
     public class DeleteBookCommand : IRequest<List<Book>>
     {
-        public int bookId { get; }
-        public DeleteBookCommand(int Id)
+        public int Id { get; }
+        public DeleteBookCommand(int id)
         {
-            Id = bookId;
+            Id = id;
         }
 
     }

@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{BB373A26-2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{E4B897F1-0BEE-45C8-9CA8-B56FE4E0D785}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{79116F1E-354A-4295-BF23-1158DECF024F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApplicationBook", "ApplicationBook", "{79116F1E-354A-4295-BF23-1158DECF024F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationBook", "ApplicationBook\ApplicationBook.csproj", "{92F4117E-B66F-4C6F-8B80-4F03D073E3F0}"
 EndProject

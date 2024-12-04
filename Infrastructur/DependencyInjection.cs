@@ -1,4 +1,7 @@
-﻿using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using Domain;
+using Infrastructur.Database;
+using Infrastructur.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +20,8 @@ namespace Infrastructur
             {
                 options.UseSqlServer(connectionstring);
             });
+            services.AddScoped<IRepository<Author>, Repository<Author>>();
+            services.AddScoped<IRepository<Book>, Repository<Book>>();
 
             return services;
         }
