@@ -13,6 +13,11 @@ namespace Domain
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
+
+        public Author()
+        {
+
+        }
         public Author(int id, string name, string lastName)
         {
             Id = id;
