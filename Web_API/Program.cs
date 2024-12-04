@@ -34,7 +34,7 @@ namespace Web_API
                         IssuerSigningKey = new SymmetricSecurityKey(secretKey)
                     };
                 });
-
+            //Change for Pullrequest
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("Admin", policy =>
