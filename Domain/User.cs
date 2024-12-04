@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain
+﻿namespace Domain
 {
 
-   
+
 
     public class User
     {
@@ -16,7 +10,7 @@ namespace Domain
         public string Password { get; set; } = string.Empty;
 
         public User()
-        { 
+        {
         }
     }
 }

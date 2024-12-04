@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MediatR;
-using ApplicationBook.Users.Queries.LogIn.Helpers;
+﻿using ApplicationBook.Users.Queries.LogIn.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace ApplicationBook

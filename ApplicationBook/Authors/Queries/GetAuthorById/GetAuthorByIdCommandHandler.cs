@@ -1,11 +1,6 @@
 ﻿using Domain;
 using Infrastructur.Database;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApplicationBook.Authors.Queries.GetAuthorById
 {
@@ -20,7 +15,7 @@ namespace ApplicationBook.Authors.Queries.GetAuthorById
 
         public Task<Author> Handle(GetAuthorByIdQuery request, CancellationToken cancellationToken)
         {
-            
+
             if (request.Id <= 0)
             {
                 throw new ArgumentException("The ID must be a positive integer.");
@@ -28,7 +23,7 @@ namespace ApplicationBook.Authors.Queries.GetAuthorById
 
             var author = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == request.Id);
 
-            
+
             if (author == null)
             {
                 throw new KeyNotFoundException($"Author with ID {request.Id} was not found.");

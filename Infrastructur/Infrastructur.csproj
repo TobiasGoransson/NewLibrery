@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ExternalServises\" />
+    <Compile Remove="ExternalServises\**" />
+    <EmbeddedResource Remove="ExternalServises\**" />
+    <None Remove="ExternalServises\**" />
   </ItemGroup>
 
   <ItemGroup>
