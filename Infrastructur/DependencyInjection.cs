@@ -5,7 +5,6 @@ using Infrastructur.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-
 namespace Infrastructur
 {
     public static class DependencyInjection
@@ -13,8 +12,6 @@ namespace Infrastructur
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionstring)
         {
 
-
-            services.AddSingleton<FakeDatabase>();
 
             services.AddDbContext<Realdatabase>(options =>
             {
