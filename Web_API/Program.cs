@@ -1,10 +1,11 @@
 
 using ApplicationBook;
-using Infrastructur;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Infrastructur;
+
 
 namespace Web_API
 {

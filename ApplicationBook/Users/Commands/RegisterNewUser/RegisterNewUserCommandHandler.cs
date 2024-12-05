@@ -1,28 +1,34 @@
-﻿using Domain;
-using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using Domain;
 using MediatR;
 
 namespace ApplicationBook.Users.Commands.RegisterNewUser
 {
     internal sealed class RegisterNewUserCommandHandler : IRequestHandler<RegisterNewUserCommand, User>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IRepository<User> _repository;
 
-        public RegisterNewUserCommandHandler(FakeDatabase fakeDatabase)
+        public RegisterNewUserCommandHandler(IRepository<User> repository)
         {
-            _fakeDatabase = fakeDatabase;
+            _repository = repository;
         }
 
-        public Task<User> Handle(RegisterNewUserCommand request, CancellationToken cancellationToken)
+        public async Task<User> Handle(RegisterNewUserCommand request, CancellationToken cancellationToken)
         {
+            // Skapa en ny användare
             User newUser = new User
             {
                 UserId = Guid.NewGuid(),
                 UserName = request.NewUser.UserName,
                 Password = request.NewUser.Password
             };
-            _fakeDatabase.Users.Add(newUser);
-            return Task.FromResult(newUser);
+
+            // Lägg till användaren i repositoryn
+            await _repository.CreateAsync(newUser);
+
+            // Returnera den nyregistrerade användaren
+            return newUser;
         }
     }
+
 }

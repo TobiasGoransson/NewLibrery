@@ -1,23 +1,25 @@
-﻿using Domain;
-using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using Domain;
 using MediatR;
 
 namespace ApplicationBook.Users.Queries.GetAllUsers
 {
     internal sealed class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<User>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IRepository<User> _repository;
 
-        public GetAllUsersQueryHandler(FakeDatabase fakeDatabase)
+        public GetAllUsersQueryHandler(IRepository<User> repository)
         {
-            _fakeDatabase = fakeDatabase;
+            _repository = repository;
         }
 
-        public Task<List<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<List<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            List<User> AllUsersFromFakedatabase = _fakeDatabase.Users;
-            return Task.FromResult(AllUsersFromFakedatabase);
-        }
+            // Hämta alla användare från repositoryn
+            var allUsers = await _repository.GetAllAsync();
 
+            return allUsers;
+        }
     }
+
 }
