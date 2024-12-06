@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain
+﻿namespace Domain
 {
     public class Author
     {
@@ -13,6 +7,11 @@ namespace Domain
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
+
+        public Author()
+        {
+
+        }
         public Author(int id, string name, string lastName)
         {
             Id = id;
@@ -25,6 +24,6 @@ namespace Domain
             LastName = lastName;
         }
 
-       
+
     }
 }

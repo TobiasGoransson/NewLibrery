@@ -1,43 +1,37 @@
-﻿using ApplicationBook.Books.Commands.CreateBook;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
 using MediatR;
-using Infrastructur;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Infrastructur.Database;
 
 namespace ApplicationBook.Books.Commands.DeleteBook
 {
     public class DeleteBookCommandHandler : IRequestHandler<DeleteBookCommand, List<Book>>
     {
-        private readonly FakeDatabase fakeDatabase;
+        private readonly IRepository<Book> _repository;
 
-        public DeleteBookCommandHandler(FakeDatabase fakeDatabase)
+        public DeleteBookCommandHandler(IRepository<Book> repository)
         {
-            this.fakeDatabase = fakeDatabase;
+            _repository = repository;
         }
 
-        public Task<List<Book>> Handle(DeleteBookCommand request, CancellationToken cancellationToken)
+        public async Task<List<Book>> Handle(DeleteBookCommand request, CancellationToken cancellationToken)
         {
-            
-            var bookToDelete = fakeDatabase.Books.FirstOrDefault(b => b.Id == request.bookId);
+            // Hämta boken som ska tas bort
+            var bookToDelete = await _repository.GetByIdAsync(request.Id, cancellationToken);
 
+            // Kontrollera om boken finns
             if (bookToDelete == null)
             {
-                throw new KeyNotFoundException($"Ingen bok hittades med ID {request.bookId}.");
+                throw new KeyNotFoundException($"Ingen bok hittades med ID {request.Id}.");
             }
 
-            
-            fakeDatabase.Books.Remove(bookToDelete);
+            // Ta bort boken
+            await _repository.DeleteByIdAsync(request.Id);
 
-            
-            return Task.FromResult(fakeDatabase.Books);
+            // Hämta och returnera den uppdaterade listan med böcker
+            var books = await _repository.GetAllAsync();
+            return books.ToList();
         }
     }
-
 
 
 }

@@ -1,13 +1,9 @@
 ﻿using Domain;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ApplicationBook.Users.Queries.LogIn.Helpers
 {
@@ -22,13 +18,13 @@ namespace ApplicationBook.Users.Queries.LogIn.Helpers
 
         public string GenerateJwtToken(User user)
         {
-            
+
 
             var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecuretKey"]!);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new []
+                Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),

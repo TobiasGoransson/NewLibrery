@@ -1,36 +1,31 @@
-﻿using Domain;
-using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using Domain;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApplicationBook.Books.Queries.GetBookById
 {
     public class GetValueByIdQueryHandler : IRequestHandler<GetValueByIdQuery, Book>
     {
-        private readonly FakeDatabase _database;
+        private readonly IRepository<Book> _repository;
 
-        public GetValueByIdQueryHandler(FakeDatabase database)
+        public GetValueByIdQueryHandler(IRepository<Book> repository)
         {
-            _database = database;
+            _repository = repository;
         }
 
         public async Task<Book> Handle(GetValueByIdQuery request, CancellationToken cancellationToken)
         {
-            // Kontrollera om databasen är korrekt initialiserad
-            if (_database == null || _database.Books == null)
+            // Hämta boken baserat på ID
+            var book = await _repository.GetByIdAsync(request.Id, cancellationToken);
+
+            if (book == null)
             {
-                throw new InvalidOperationException("Database is not initialized.");
+                throw new KeyNotFoundException($"Ingen bok hittades med ID {request.Id}.");
             }
 
-            // Hämta boken baserat på ID
-            var book = _database.Books.FirstOrDefault(b => b.Id == request.Id);
-
-            return await Task.FromResult(book);
+            return book;
         }
     }
+
 
 }

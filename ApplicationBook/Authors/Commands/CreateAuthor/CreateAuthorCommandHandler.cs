@@ -1,33 +1,27 @@
 ﻿using ApplicationBook.Authors.Queries.GetAllAuthors;
+using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
-using Infrastructur.Database;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApplicationBook.Authors.Commands.CreateAuthor
 {
     public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IRepository<Author> _repository;
 
-        public GetAllAuthorsQueryHandler(FakeDatabase fakeDatabase)
+        public GetAllAuthorsQueryHandler(IRepository<Author> repository)
         {
-            _fakeDatabase = fakeDatabase;
+            _repository = repository;
         }
 
-        public Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+        public async Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
         {
-            // Kontrollera att databasen inte är null
-            if (_fakeDatabase.Authors == null)
-            {
-                return Task.FromResult(new List<Author>()); // Returnerar en tom lista istället för null
-            }
+            // Hämtar alla författare från repository
+            var authors = await _repository.GetAllAsync();
 
-            return Task.FromResult(_fakeDatabase.Authors);
+            // Returnera en tom lista om inga författare hittas
+            return authors ?? new List<Author>();
         }
     }
+
 }

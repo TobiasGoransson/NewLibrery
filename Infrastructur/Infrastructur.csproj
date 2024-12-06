@@ -7,15 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ExternalServises\" />
+    <Compile Remove="ExternalServises\**" />
+    <EmbeddedResource Remove="ExternalServises\**" />
+    <None Remove="ExternalServises\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+	  <ProjectReference Include="..\ApplicationBook\ApplicationBook.csproj" />
+	  
   </ItemGroup>
 
 </Project>

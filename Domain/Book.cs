@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 
 namespace Domain
@@ -22,6 +17,12 @@ namespace Domain
 
         [Required(ErrorMessage = "The Author is required.")]
         public Author Author { get; set; }
+
+
+        public Book()
+        {
+
+        }
 
         public Book(int id, string title, string description, Author author)
         {

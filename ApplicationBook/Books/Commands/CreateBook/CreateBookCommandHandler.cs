@@ -1,34 +1,27 @@
-﻿using Domain;
-using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using Domain;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApplicationBook.Books.Commands.CreateBook
 {
     public class CreateBookCommandHandler : IRequestHandler<CreateBookCommand, List<Book>>
     {
-        private readonly FakeDatabase fakeDatabase;
+        private readonly IRepository<Book> _repository;
 
-        public CreateBookCommandHandler(FakeDatabase fakeDatabase)
+        public CreateBookCommandHandler(IRepository<Book> repository)
         {
-            this.fakeDatabase = fakeDatabase;
+            _repository = repository;
         }
 
-        public Task<List<Book>> Handle(CreateBookCommand request, CancellationToken cancellationToken)
+        public async Task<List<Book>> Handle(CreateBookCommand request, CancellationToken cancellationToken)
         {
-            // Beräkna nästa ID baserat på böcker som redan finns i databasen
-            int nextId = fakeDatabase.Books.Any() ? fakeDatabase.Books.Max(b => b.Id) + 1 : 1;
-            request.NewBook.Id = nextId;
+            // Lägg till den nya boken i repositoryt
+            await _repository.CreateAsync(request.NewBook);
 
-            // Lägg till den nya boken i databasen
-            fakeDatabase.Books.Add(request.NewBook);
-
-            // Returnera den uppdaterade listan med böcker
-            return Task.FromResult(fakeDatabase.Books);
+            // Hämta och returnera den uppdaterade listan med böcker
+            var books = await _repository.GetAllAsync();
+            return books ?? new List<Book>();
         }
     }
+
 }

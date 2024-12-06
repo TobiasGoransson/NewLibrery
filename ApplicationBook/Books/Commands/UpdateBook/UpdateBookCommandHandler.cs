@@ -1,27 +1,22 @@
-﻿using Domain;
-using Infrastructur.Database;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using Domain;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApplicationBook.Books.Commands.UpdateBook
 {
     public class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand, Book>
     {
-        private readonly FakeDatabase fakeDatabase;
+        private readonly IRepository<Book> _repository;
 
-        public UpdateBookCommandHandler(FakeDatabase fakeDatabase)
+        public UpdateBookCommandHandler(IRepository<Book> repository)
         {
-            this.fakeDatabase = fakeDatabase;
+            _repository = repository;
         }
 
-        public Task<Book> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
+        public async Task<Book> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
         {
             // Hitta boken med det givna ID:t
-            var existingBook = fakeDatabase.Books.FirstOrDefault(b => b.Id == request.UpdatedBook.Id);
+            var existingBook = await _repository.GetByIdAsync(request.UpdatedBook.Id, cancellationToken);
 
             if (existingBook == null)
             {
@@ -33,9 +28,13 @@ namespace ApplicationBook.Books.Commands.UpdateBook
             existingBook.Description = request.UpdatedBook.Description;
             existingBook.Author = request.UpdatedBook.Author;
 
+            // Uppdatera boken i databasen
+            await _repository.UpdateAsync(existingBook, cancellationToken);
+
             // Returnera den uppdaterade boken
-            return Task.FromResult(existingBook);
+            return existingBook;
         }
     }
+
 
 }

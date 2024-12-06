@@ -1,10 +1,4 @@
 ﻿using Domain;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructur.Database
 {
@@ -37,7 +31,7 @@ namespace Infrastructur.Database
 
         private static List<User> allUsersFromDB = new List<User>
         {
-            new User { UserId = Guid.NewGuid(), UserName = "BOB" }, 
+            new User { UserId = Guid.NewGuid(), UserName = "BOB" },
             new User { UserId = Guid.NewGuid(), UserName = "Sofie" },
         };
 
