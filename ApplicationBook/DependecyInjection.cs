@@ -1,4 +1,5 @@
-﻿using ApplicationBook.Users.Queries.LogIn.Helpers;
+﻿using ApplicationBook.Interfaces.RepoInterfaces;
+using ApplicationBook.Users.Queries.LogIn.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -10,8 +11,11 @@ namespace ApplicationBook
         {
             var assembly = typeof(DependencyInjection).Assembly;
 
-            services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(assembly));
+            services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+
             services.AddScoped<Tokenhelper>();
+           
+
 
 
             return services;

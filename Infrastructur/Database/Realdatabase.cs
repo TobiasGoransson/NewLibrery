@@ -4,19 +4,26 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructur.Database
 {
-    public class Realdatabase(DbContextOptions<Realdatabase> options) : DbContext(options)
+    public class Realdatabase : DbContext
     {
-       
 
-        public DbSet<Author> Authors { get; set; }
-        public DbSet<Book> Books { get; set; }
-        public DbSet<User> Users { get; set; }
-       
+
+        public Realdatabase(DbContextOptions<Realdatabase> options) : base(options)
+        {
+        }
+
+        public DbSet<Author> Author { get; set; }
+        public DbSet<Book> Book { get; set; }
+        public DbSet<User> User { get; set; }
+
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionBuilder)
         {
-            optionBuilder.UseSqlServer("Server=MSI\\SQLEXPRESS;Database=TobyServer;Trusted_Connection=true;TrustServerCertificate=True;");
+            if (!optionBuilder.IsConfigured)
+            {
+                optionBuilder.UseSqlServer("Server=MSI\\SQLEXPRESS;Database=TobyServer;Trusted_Connection=true;TrustServerCertificate=True;");
+            }
         }
     }
 }

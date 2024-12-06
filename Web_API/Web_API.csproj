@@ -19,5 +19,9 @@
     <ProjectReference Include="..\ApplicationBook\ApplicationBook.csproj" />
     <ProjectReference Include="..\Infrastructur\Infrastructur.csproj" />
   </ItemGroup>
-
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
