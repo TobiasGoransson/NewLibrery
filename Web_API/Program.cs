@@ -1,11 +1,15 @@
-
 using ApplicationBook;
+using Infrastructur;
+using Infrastructur.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using Infrastructur;
-
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
+using Microsoft.Extensions.Hosting;
 
 namespace Web_API
 {
@@ -13,9 +17,32 @@ namespace Web_API
     {
         public static void Main(string[] args)
         {
+            // Konfigurera Serilog för SQL Server Express
+            var columnOptions = new ColumnOptions
+            {
+                // Specifika kolumner för loggar
+                TimeStamp = { ColumnName = "Timestamp", DataType = System.Data.SqlDbType.DateTime },
+                Level = { ColumnName = "Level", DataType = System.Data.SqlDbType.NVarChar },
+                Message = { ColumnName = "Message", DataType = System.Data.SqlDbType.NVarChar },
+                Exception = { ColumnName = "Exception", DataType = System.Data.SqlDbType.NVarChar },
+                Properties = { ColumnName = "Properties", DataType = System.Data.SqlDbType.NVarChar }
+            };
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.MSSqlServer(
+                    connectionString: "Server=MSI\\SQLEXPRESS;Database=TobyServer;Trusted_Connection=true;TrustServerCertificate=True;", 
+                    tableName: "Logs",  // Namnet på loggtabellen
+                    autoCreateSqlTable: true,  // Skapa tabellen automatiskt om den inte finns
+                    columnOptions: columnOptions)  // Använd kolumninställningar för loggdata
+                .CreateLogger();
+
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Lägg till loggning för felsökning (valfritt)
+            builder.Logging.ClearProviders();
+            builder.Logging.AddSerilog();  // Använd Serilog för loggning
+
+            // Lägg till tjänster till DI-kontainern
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             byte[] secretKey = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"]!);
 
@@ -23,19 +50,18 @@ namespace Web_API
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
             }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(secretKey)
-                    };
-                });
-            //Change for Pullrequest
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+                };
+            });
+
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("Admin", policy =>
@@ -44,6 +70,7 @@ namespace Web_API
                     policy.RequireAuthenticatedUser();
                 });
             });
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web_API", Version = "v1" });
@@ -69,22 +96,23 @@ namespace Web_API
                 });
             });
 
-                builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Lägg till Application-tjänster
             builder.Services.AddApplication();
 
+            // Hämta anslutningssträngen från konfiguration
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
             builder.Services.AddInfrastructure(connectionString);
 
-            
+            // Lägg till MediatR om det inte redan är gjort i AddApplication
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Konfigurera HTTP-request pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -93,8 +121,8 @@ namespace Web_API
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication(); // Viktigt att anropa UseAuthentication före UseAuthorization
             app.UseAuthorization();
-
 
             app.MapControllers();
 

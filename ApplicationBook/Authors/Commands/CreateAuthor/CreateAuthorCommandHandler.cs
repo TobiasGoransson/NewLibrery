@@ -2,26 +2,44 @@
 using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
-namespace ApplicationBook.Authors.Commands.CreateAuthor
+public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
 {
-    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
+    private readonly IRepository<Author> _repository;
+    private readonly ILogger<GetAllAuthorsQueryHandler> _logger;
+
+    public GetAllAuthorsQueryHandler(IRepository<Author> repository, ILogger<GetAllAuthorsQueryHandler> logger)
     {
-        private readonly IRepository<Author> _repository;
+        _repository = repository;
+        _logger = logger;
+    }
 
-        public GetAllAuthorsQueryHandler(IRepository<Author> repository)
-        {
-            _repository = repository;
-        }
+    public async Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Handling GetAllAuthorsQuery.");
 
-        public async Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+        try
         {
             // Hämtar alla författare från repository
             var authors = await _repository.GetAllAsync();
 
+            if (authors == null || authors.Count == 0)
+            {
+                _logger.LogWarning("No authors found in the repository.");
+            }
+            else
+            {
+                _logger.LogInformation("Retrieved {AuthorCount} authors from the repository.", authors.Count);
+            }
+
             // Returnera en tom lista om inga författare hittas
             return authors ?? new List<Author>();
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while fetching authors.");
+            throw;
+        }
     }
-
 }
