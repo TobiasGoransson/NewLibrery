@@ -6,8 +6,11 @@ namespace ApplicationBook.Authors.Commands.CreateAuthor
 {
     public class CreateAuthorCommand : IRequest<Author>
     {
+        
+
         [Required(ErrorMessage = "FirstName is required.")]
         [StringLength(100, ErrorMessage = "FirstName cannot exceed 100 characters.")]
+      
         public string FirstName { get; }
 
         [Required(ErrorMessage = "LastName is required.")]

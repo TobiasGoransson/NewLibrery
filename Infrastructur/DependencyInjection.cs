@@ -9,18 +9,20 @@ namespace Infrastructur
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionstring)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
         {
-
-
             services.AddDbContext<Realdatabase>(options =>
             {
-                options.UseSqlServer(connectionstring);
+                options.UseSqlServer(connectionString);
             });
+
             services.AddScoped<IRepository<Author>, Repository<Author>>();
             services.AddScoped<IRepository<Book>, Repository<Book>>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRepository<User>, Repository<User>>();
 
             return services;
         }
+
     }
 }
