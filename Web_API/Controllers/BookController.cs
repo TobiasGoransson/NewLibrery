@@ -28,33 +28,48 @@ namespace Web_API.Controllers
         public async Task<IActionResult> GetBooks()
         {
             _logger.LogInformation("Fetching all books...");
-            var result = await _mediator.Send(new GetAllValuesQuery());
-            _logger.LogInformation("Fetched {Count} books successfully.", result.Count);
-            return Ok(result);
+
+            var operationResult = await _mediator.Send(new GetAllValuesQuery());
+
+            if (!operationResult.Success)
+            {
+                _logger.LogWarning("Failed to fetch books. Error: {Error}", operationResult.ErrorMessage);
+                return BadRequest(new { Message = operationResult.ErrorMessage });
+            }
+
+            _logger.LogInformation("Fetched {Count} books successfully.", operationResult.Data.Count);
+            return Ok(new { Message = operationResult.Message, Data = operationResult.Data });
         }
 
         // GET: api/Books/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            _logger.LogInformation("Fetching book with ID: {Id}", id);
 
-            if (id <= 0)
+            try
             {
-                _logger.LogWarning("Invalid ID provided: {Id}", id);
-                return BadRequest(new { Message = "The ID must be a positive integer." });
+                var operationResult = _mediator.Send(new GetValueByIdQuery(id)).Result;
+                _logger.LogInformation("Fetching book with ID: {Id}", id);
+
+                if (operationResult.Success)
+                {
+                    _logger.LogInformation("Book with ID {Id} fetched successfully.", id);
+                    return Ok(new { message = operationResult.Message, data = operationResult.Data });
+                }
+                else
+                {
+                    _logger.LogWarning("Invalid ID provided: {Id}", id);
+                    return BadRequest(new { message = operationResult.Message, errors = operationResult.ErrorMessage });
+
+                }
             }
-
-            var result = await _mediator.Send(new GetValueByIdQuery(id));
-
-            if (result == null)
+            catch
             {
-                _logger.LogWarning("Book with ID {Id} was not found.", id);
-                return NotFound(new { Message = $"Book with ID {id} was not found." });
-            }
+                return StatusCode(500, new { message = "Internal server error" });
 
-            _logger.LogInformation("Book with ID {Id} fetched successfully.", id);
-            return Ok(result);
+            }   
+
+           
         }
 
         // POST api/<BookController>
@@ -81,10 +96,16 @@ namespace Web_API.Controllers
                 return BadRequest(new { Message = "The book must have an author." });
             }
 
-            var result = await _mediator.Send(new CreateBookCommand(bookToAdd));
+            var operationResult = await _mediator.Send(new CreateBookCommand(bookToAdd));
 
-            _logger.LogInformation("Book created successfully with ID: {Id}", result);
-            return Ok(result);
+            if (!operationResult.Success)
+            {
+                _logger.LogWarning("Failed to create book. Error: {Error}", operationResult.ErrorMessage);
+                return BadRequest(new { Message = operationResult.ErrorMessage });
+            }
+
+            _logger.LogInformation("Book created successfully.");
+            return Ok(new { Message = operationResult.Message, Data = operationResult.Data });
         }
 
         // PUT api/<BookController>/5
@@ -93,23 +114,22 @@ namespace Web_API.Controllers
         {
             _logger.LogInformation("Updating book with ID: {Id}", id);
 
-            if (id != updatedBook.Id)
+            if (id != updatedBook.BId)
             {
-                _logger.LogWarning("ID mismatch: URL ID {UrlId} does not match body ID {BodyId}.", id, updatedBook.Id);
-                return BadRequest("ID:t i URL:en matchar inte ID:t i objektet.");
+                _logger.LogWarning("ID mismatch: URL ID {UrlId} does not match body ID {BodyId}.", id, updatedBook.BId);
+                return BadRequest(new { Message = "The ID in the URL does not match the ID in the provided book." });
             }
 
-            try
+            var operationResult = await _mediator.Send(new UpdateBookCommand(updatedBook));
+
+            if (!operationResult.Success)
             {
-                var result = await _mediator.Send(new UpdateBookCommand(updatedBook));
-                _logger.LogInformation("Book with ID {Id} updated successfully.", id);
-                return Ok(result);
+                _logger.LogWarning("Failed to update book with ID: {Id}. Error: {Error}", id, operationResult.ErrorMessage);
+                return BadRequest(new { Message = operationResult.ErrorMessage });
             }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning("Update failed: {Message}", ex.Message);
-                return NotFound(new { Message = ex.Message });
-            }
+
+            _logger.LogInformation("Book with ID {Id} updated successfully.", id);
+            return Ok(new { Message = operationResult.Message, Data = operationResult.Data });
         }
 
         // DELETE api/<BookController>/5
@@ -118,23 +138,16 @@ namespace Web_API.Controllers
         {
             _logger.LogInformation("Deleting book with ID: {Id}", id);
 
-            if (id <= 0)
-            {
-                _logger.LogWarning("Invalid ID provided: {Id}", id);
-                return BadRequest("Invalid ID. ID must be a positive integer.");
-            }
+            var operationResult = await _mediator.Send(new DeleteBookCommand(id));
 
-            var command = new DeleteBookCommand(id);
-            var result = await _mediator.Send(command);
-
-            if (result == null)
+            if (!operationResult.Success)
             {
-                _logger.LogWarning("Book with ID {Id} was not found for deletion.", id);
-                return NotFound(new { Message = $"Book with ID {id} was not found." });
+                _logger.LogWarning("Failed to delete book with ID: {Id}. Error: {Error}", id, operationResult.ErrorMessage);
+                return BadRequest(new { Message = operationResult.ErrorMessage });
             }
 
             _logger.LogInformation("Book with ID {Id} deleted successfully.", id);
-            return NoContent();
+            return Ok(new { Message = operationResult.Message, Data = operationResult.Data });
         }
     }
 }

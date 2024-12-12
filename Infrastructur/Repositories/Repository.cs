@@ -1,5 +1,6 @@
 ﻿using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
+using Infrastructur.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,10 @@ namespace Infrastructur.Repositories
    
     public class Repository<T> : IRepository<T> where T : class
     {
-        private readonly DbContext _context;
+        private readonly Realdatabase _context;
         private readonly DbSet<T> _dbSet;
 
-        public Repository(DbContext context)
+        public Repository(Realdatabase context)
         {
             _context = context;
             _dbSet = context.Set<T>();
@@ -56,7 +57,7 @@ namespace Infrastructur.Repositories
             return "Entity not found";
         }
 
-        
+       
     }
 
 }

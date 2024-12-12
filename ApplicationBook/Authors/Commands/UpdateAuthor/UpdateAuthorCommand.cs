@@ -5,7 +5,7 @@ namespace ApplicationBook.Authors.Commands.UpdateAuthor
 {
     using System.ComponentModel.DataAnnotations;
 
-    public class UpdateAuthorCommand : IRequest<Author>
+    public class UpdateAuthorCommand : IRequest<OperationResult<Author>>
     {
         public int Id { get; }
 

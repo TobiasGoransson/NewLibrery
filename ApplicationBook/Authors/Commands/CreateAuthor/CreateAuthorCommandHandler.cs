@@ -1,45 +1,52 @@
-﻿using ApplicationBook.Authors.Queries.GetAllAuthors;
+﻿using ApplicationBook.Authors.Commands.CreateAuthor;
+using ApplicationBook.Common; // Add this namespace
+using ApplicationBook.Dtos;
 using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
+public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, OperationResult<Author>>
 {
     private readonly IRepository<Author> _repository;
-    private readonly ILogger<GetAllAuthorsQueryHandler> _logger;
+    private readonly ILogger<CreateAuthorCommandHandler> _logger;
 
-    public GetAllAuthorsQueryHandler(IRepository<Author> repository, ILogger<GetAllAuthorsQueryHandler> logger)
+    public CreateAuthorCommandHandler(IRepository<Author> repository, ILogger<CreateAuthorCommandHandler> logger)
     {
         _repository = repository;
         _logger = logger;
     }
 
-    public async Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+    public async Task<OperationResult<Author>> Handle(CreateAuthorCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handling GetAllAuthorsQuery.");
+        _logger.LogInformation("Starting CreateAuthorCommand for {AuthorName}", request.NewAuthor.FirstName);
+
+        // Map DTO to domain entity
+        var author = new Author
+        {
+            AId = 0,
+            FirstName = request.NewAuthor.FirstName,
+            LastName = request.NewAuthor.LastName
+        };
 
         try
         {
-            // Hämtar alla författare från repository
-            var authors = await _repository.GetAllAsync();
+            // Save to the repository
+            await _repository.CreateAsync(author);
 
-            if (authors == null || authors.Count == 0)
-            {
-                _logger.LogWarning("No authors found in the repository.");
-            }
-            else
-            {
-                _logger.LogInformation("Retrieved {AuthorCount} authors from the repository.", authors.Count);
-            }
+            // Log success
+            _logger.LogInformation("Successfully created author with ID {AuthorId}", author.AId);
 
-            // Returnera en tom lista om inga författare hittas
-            return authors ?? new List<Author>();
+            return OperationResult<Author>.Successfull(author);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while fetching authors.");
-            throw;
+            // Log exception
+            _logger.LogError(ex, "Error occurred while creating an author.");
+            return OperationResult<Author>.Failure("An error occurred while creating the author.");
         }
     }
 }

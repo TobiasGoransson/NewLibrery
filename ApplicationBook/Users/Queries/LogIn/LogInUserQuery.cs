@@ -1,9 +1,10 @@
-﻿using ApplicationBook.Users.Dtos;
+﻿using ApplicationBook.Dtos; // Importera OperationResult
+using Domain;
 using MediatR;
 
 namespace ApplicationBook.Users.Queries.LogIn
 {
-    public class LogInUserQuery : IRequest<string>
+    public class LogInUserQuery : IRequest<OperationResult<string>>
     {
         public LogInUserQuery(UserDto logInUser)
         {
