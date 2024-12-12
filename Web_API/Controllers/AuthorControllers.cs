@@ -9,6 +9,7 @@ using ApplicationBook.Authors.Commands.UpdateAuthor;
 using ApplicationBook.Authors.Commands.DeleteAuthor;
 using ApplicationBook.Authors.Queries.GetAllAuthors;
 using ApplicationBook.Authors.Queries.GetAuthorById;
+using ApplicationBook.Dtos;
 
 
 [Route("api/[controller]")]
@@ -20,7 +21,7 @@ public class AuthorController : ControllerBase
     public AuthorController(IMediator mediator, ILogger<AuthorController> logger)
     {
         _mediator = mediator;
-        _logger = logger;   
+        _logger = logger;
     }
 
     // GET: api/author
@@ -43,7 +44,7 @@ public class AuthorController : ControllerBase
         }
         catch (Exception ex)
         {
-            
+
             return StatusCode(500, new { Message = "An error occurred while fetching authors.", Details = ex.Message });
             _logger.LogError(ex, "An error occurred while fetching authors.");
         }
@@ -71,34 +72,31 @@ public class AuthorController : ControllerBase
 
     // POST: api/author
     [HttpPost]
-    public async Task<ActionResult<Author>> CreateAuthor([FromBody] CreateAuthorCommand command)
+    [Route("CreateAuthor")]
+    public async Task<IActionResult> CreateAuthor([FromBody] CreateAuthorCommand command)
     {
         _logger.LogInformation("Creating a new author.");
-        // Validera att kommandot inte är null
-        if (command == null)
-        {
-            return BadRequest("The request body cannot be null.");
-
-            _logger.LogWarning("The request body cannot be null.");
-        }
-
+        try
+        { 
         // Validera att förnamn och efternamn inte är tomma
-        if (string.IsNullOrWhiteSpace(command.FirstName) || string.IsNullOrWhiteSpace(command.LastName))
-        {
+            if (command == null)
+            {
             return BadRequest("Both FirstName and LastName must be provided.");
             _logger.LogWarning("Both FirstName and LastName must be provided.");
+             }
+
+            var createdAuthor = await _mediator.Send(command);
+            return Ok(createdAuthor);
         }
-
-        var createdAuthor = await _mediator.Send(command);
-
-        // Om inget objekt skapas, returnera ett internt fel
-        if (createdAuthor == null)
+        catch
         {
+        // Om inget objekt skapas, returnera ett internt fel
+      
             return StatusCode(500, "An error occurred while creating the author.");
             _logger.LogError("An error occurred while creating the author.");
         }
 
-        return CreatedAtAction(nameof(GetAuthorById), new { id = createdAuthor.Id }, createdAuthor);
+        
     }
 
 

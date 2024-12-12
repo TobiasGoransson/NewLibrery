@@ -93,9 +93,9 @@ namespace Web_API.Controllers
         {
             _logger.LogInformation("Updating book with ID: {Id}", id);
 
-            if (id != updatedBook.Id)
+            if (id != updatedBook.BId)
             {
-                _logger.LogWarning("ID mismatch: URL ID {UrlId} does not match body ID {BodyId}.", id, updatedBook.Id);
+                _logger.LogWarning("ID mismatch: URL ID {UrlId} does not match body ID {BodyId}.", id, updatedBook.BId);
                 return BadRequest("ID:t i URL:en matchar inte ID:t i objektet.");
             }
 

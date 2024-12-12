@@ -18,33 +18,40 @@ namespace Web_API
         public static void Main(string[] args)
         {
             // Konfigurera Serilog för SQL Server Express
-            var columnOptions = new ColumnOptions
-            {
-                // Specifika kolumner för loggar
-                TimeStamp = { ColumnName = "Timestamp", DataType = System.Data.SqlDbType.DateTime },
-                Level = { ColumnName = "Level", DataType = System.Data.SqlDbType.NVarChar },
-                Message = { ColumnName = "Message", DataType = System.Data.SqlDbType.NVarChar },
-                Exception = { ColumnName = "Exception", DataType = System.Data.SqlDbType.NVarChar },
-                Properties = { ColumnName = "Properties", DataType = System.Data.SqlDbType.NVarChar }
-            };
+            //var columnOptions = new ColumnOptions
+            //{
+            //    TimeStamp = { ColumnName = "Timestamp", DataType = System.Data.SqlDbType.DateTime },
+            //    Level = { ColumnName = "Level", DataType = System.Data.SqlDbType.NVarChar },
+            //    Message = { ColumnName = "Message", DataType = System.Data.SqlDbType.NVarChar },
+            //    Exception = { ColumnName = "Exception", DataType = System.Data.SqlDbType.NVarChar },
+            //    Properties = { ColumnName = "Properties", DataType = System.Data.SqlDbType.NVarChar }
+            //};
 
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.MSSqlServer(
-                    connectionString: "Server=MSI\\SQLEXPRESS;Database=TobyServer;Trusted_Connection=true;TrustServerCertificate=True;", 
-                    tableName: "Logs",  // Namnet på loggtabellen
-                    autoCreateSqlTable: true,  // Skapa tabellen automatiskt om den inte finns
-                    columnOptions: columnOptions)  // Använd kolumninställningar för loggdata
-                .CreateLogger();
+            //Log.Logger = new LoggerConfiguration()
+            //    .WriteTo.MSSqlServer(
+            //        connectionString: "Server=MSI\\SQLEXPRESS;Database=TobyServer;Trusted_Connection=true;TrustServerCertificate=True;",
+            //        tableName: "Logs",
+            //        autoCreateSqlTable: true,
+            //        columnOptions: columnOptions)
+            //    .CreateLogger();
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // Lägg till loggning för felsökning (valfritt)
+            // Lägg till loggning och Serilog
             builder.Logging.ClearProviders();
-            builder.Logging.AddSerilog();  // Använd Serilog för loggning
+            builder.Logging.AddSerilog();
 
-            // Lägg till tjänster till DI-kontainern
+            // Lägg till tjänster
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            builder.Services.AddDbContext<Realdatabase>(options =>
+                options.UseSqlServer(connectionString));
+            builder.Services.AddApplication();
+            builder.Services.AddInfrastructure(connectionString);
+
+            // JWT och autentisering
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-            byte[] secretKey = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"]!);
+            var secretKey = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"]!);
 
             builder.Services.AddAuthentication(options =>
             {
@@ -62,15 +69,9 @@ namespace Web_API
                 };
             });
 
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Admin", policy =>
-                {
-                    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-                    policy.RequireAuthenticatedUser();
-                });
-            });
+            builder.Services.AddAuthorization();
 
+            // Swagger
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web_API", Version = "v1" });
@@ -98,19 +99,25 @@ namespace Web_API
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            // Lägg till Application-tjänster
-            builder.Services.AddApplication();
-
-            // Hämta anslutningssträngen från konfiguration
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddInfrastructure(connectionString);
-
-            // Lägg till MediatR om det inte redan är gjort i AddApplication
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
             var app = builder.Build();
+
+            // Kör migrations och populera databasen
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<Realdatabase>();
+
+                try
+                {
+                    dbContext.Database.Migrate(); // Säkerställ att migrations körs
+                    Realdatabase.SeedDatabase(dbContext); // Populera databasen
+                }
+                catch (Exception ex)
+                {
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Ett fel uppstod när databasen skulle populeras.");
+                }
+            }
 
             // Konfigurera HTTP-request pipeline
             if (app.Environment.IsDevelopment())
@@ -120,13 +127,11 @@ namespace Web_API
             }
 
             app.UseHttpsRedirection();
-
-            app.UseAuthentication(); // Viktigt att anropa UseAuthentication före UseAuthorization
+            app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
-
             app.Run();
         }
     }
 }
+

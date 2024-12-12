@@ -1,4 +1,4 @@
-﻿using ApplicationBook.Users.Dtos;
+﻿using ApplicationBook.Dtos;
 using Domain;
 using MediatR;
 

@@ -26,7 +26,7 @@ namespace ApplicationBook.Users.Commands.RegisterNewUser
             // Skapa en ny användare
             User newUser = new User
             {
-                UserId = Guid.NewGuid(),
+                UId = 0,
                 UserName = request.NewUser.UserName,
                 Password = request.NewUser.Password
             };
