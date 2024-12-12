@@ -2,27 +2,37 @@
 {
     public class Author
     {
-        public int Id { get; set; }
+        
+        
+            public int AId { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public ICollection<Book> Books { get; set; } = new List<Book>();
+            public ICollection<User> Users { get; set; } = new List<User>();
 
-        public string FirstName { get; set; }
 
-        public string LastName { get; set; }
+            public Author()
+            {
 
-        public Author()
-        {
+            }
+        
 
-        }
-        public Author(int id, string name, string lastName)
-        {
-            Id = id;
-            FirstName = name;
-            LastName = lastName;
-        }
-        public Author(string name, string lastName)
-        {
-            FirstName = name;
-            LastName = lastName;
-        }
+       
+
+
+        
+        //public Author(string firstName, string lastName)
+        //{
+        //    FirstName = firstName;
+        //    LastName = lastName;
+        //}
+        //public Author(int aId, string firstName, string lastName)
+        //{
+        //    AId = aId;
+        //    FirstName = firstName;
+        //    LastName = lastName;
+        //}
+
 
 
     }

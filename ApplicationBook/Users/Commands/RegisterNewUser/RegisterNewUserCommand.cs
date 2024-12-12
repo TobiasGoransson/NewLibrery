@@ -1,10 +1,10 @@
-﻿using ApplicationBook.Users.Dtos;
+﻿using ApplicationBook.Dtos;
 using Domain;
 using MediatR;
 
 namespace ApplicationBook.Users.Commands.RegisterNewUser
 {
-    public class RegisterNewUserCommand : IRequest<User>
+    public class RegisterNewUserCommand : IRequest<OperationResult<User>>
     {
         public RegisterNewUserCommand(UserDto newUser)
         {

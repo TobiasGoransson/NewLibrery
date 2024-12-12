@@ -20,7 +20,7 @@ namespace Infrastructur.Repositories
 
         public async Task<User> GetByCredentialsAsync(string username, string password, CancellationToken cancellationToken)
         {
-            return await _context.User
+            return await _context.Users
                 .FirstOrDefaultAsync(u => u.UserName == username && u.Password == password, cancellationToken);
         }
     }

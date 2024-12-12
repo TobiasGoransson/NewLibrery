@@ -5,39 +5,32 @@ namespace Domain
 {
     public class Book
     {
-        public int Id { get; set; }
-
-        [Required(ErrorMessage = "The Title is required.")]
-        [StringLength(200, ErrorMessage = "The Title cannot exceed 200 characters.")]
+        public int BId { get; set; }
         public string Title { get; set; }
-
-        [Required(ErrorMessage = "The Description is required.")]
-        [StringLength(1000, ErrorMessage = "The Description cannot exceed 1000 characters.")]
         public string Description { get; set; }
-
-        [Required(ErrorMessage = "The Author is required.")]
+        public int AId { get; set; }
         public Author Author { get; set; }
-
+        public ICollection<User> Users { get; set; } = new List<User>();
 
         public Book()
         {
 
         }
+        //public Book(string title, string genre, Author author)
+        //{
+        //    Title = title;
+        //    this.Genre = genre;
+        //    Author = author;
 
-        public Book(int id, string title, string description, Author author)
-        {
-            Id = id;
-            Title = title;
-            Description = description;
-            Author = author;
-        }
 
-        public Book(string title, string description, Author author)
-        {
-            Title = title;
-            Description = description;
-            Author = author;
-        }
+        //}
+        //public Book(int bId, string title, string genre, Author author)
+        //{
+        //    BId = bId;
+        //    Title = title;
+        //    Genre = genre;
+        //    Author = author;
+        //}
+
     }
-
 }

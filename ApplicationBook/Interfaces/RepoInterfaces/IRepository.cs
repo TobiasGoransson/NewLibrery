@@ -16,7 +16,7 @@ namespace ApplicationBook.Interfaces.RepoInterfaces
 
         Task<string> DeleteByIdAsync(int id);
 
-        Task UpdateAsync(T entity, CancellationToken cancellationToken);
+        Task UpdateAsync( T entity, CancellationToken cancellationToken);
 
         
     }

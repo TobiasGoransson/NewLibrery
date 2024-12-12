@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ApplicationBook.Books.Queries.GetBookById
 {
-    public class GetValueByIdQueryHandler : IRequestHandler<GetValueByIdQuery, Book>
+    public class GetValueByIdQueryHandler : IRequestHandler<GetValueByIdQuery, OperationResult<Book>>
     {
         private readonly IRepository<Book> _repository;
         private readonly ILogger<GetValueByIdQueryHandler> _logger; // Lägg till logger
@@ -19,7 +19,7 @@ namespace ApplicationBook.Books.Queries.GetBookById
             _logger = logger; // Spara loggern
         }
 
-        public async Task<Book> Handle(GetValueByIdQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult< Book>> Handle(GetValueByIdQuery request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Handling GetValueByIdQuery for Book ID: {BookId}", request.Id); // Logga när förfrågan hanteras
 
@@ -29,12 +29,13 @@ namespace ApplicationBook.Books.Queries.GetBookById
             if (book == null)
             {
                 _logger.LogWarning("No book found with ID: {BookId}", request.Id); // Logga varning om bok inte hittas
-                throw new KeyNotFoundException($"Ingen bok hittades med ID {request.Id}.");
+                
+                return OperationResult<Book>.Failure($"No book found with ID {request.Id}.");
             }
 
             _logger.LogInformation("Book with ID: {BookId} found successfully", request.Id); // Logga att boken hittades
 
-            return book;
+            return OperationResult<Book>.Successfull(book);
         }
     }
 }

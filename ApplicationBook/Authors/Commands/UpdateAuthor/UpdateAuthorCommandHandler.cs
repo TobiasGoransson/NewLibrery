@@ -1,11 +1,15 @@
-﻿using ApplicationBook.Interfaces.RepoInterfaces;
+﻿
+using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApplicationBook.Authors.Commands.UpdateAuthor
 {
-    public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, Author>
+    public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, OperationResult<Author>>
     {
         private readonly IRepository<Author> _repository;
         private readonly ILogger<UpdateAuthorCommandHandler> _logger;
@@ -16,7 +20,7 @@ namespace ApplicationBook.Authors.Commands.UpdateAuthor
             _logger = logger;
         }
 
-        public async Task<Author> Handle(UpdateAuthorCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<Author>> Handle(UpdateAuthorCommand request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Handling UpdateAuthorCommand for Author ID: {AuthorId}", request.Id);
 
@@ -24,10 +28,11 @@ namespace ApplicationBook.Authors.Commands.UpdateAuthor
             {
                 // Hämta författaren från repository
                 var author = await _repository.GetByIdAsync(request.Id, cancellationToken);
+
                 if (author == null)
                 {
                     _logger.LogWarning("Author with ID {AuthorId} not found. Update operation aborted.", request.Id);
-                    return null;
+                    return OperationResult<Author>.Failure($"Author with ID {request.Id} not found.");
                 }
 
                 _logger.LogInformation("Author with ID {AuthorId} found. Updating author details...", request.Id);
@@ -40,12 +45,13 @@ namespace ApplicationBook.Authors.Commands.UpdateAuthor
                 await _repository.UpdateAsync(author, cancellationToken);
                 _logger.LogInformation("Author with ID {AuthorId} has been successfully updated.", request.Id);
 
-                return author; // Returnera den uppdaterade författaren
+                // Returnera framgång med den uppdaterade författaren
+                return OperationResult<Author>.Successfull(author);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating the author with ID {AuthorId}.", request.Id);
-                throw;
+                return OperationResult<Author>.Failure("An error occurred while updating the author.");
             }
         }
     }
