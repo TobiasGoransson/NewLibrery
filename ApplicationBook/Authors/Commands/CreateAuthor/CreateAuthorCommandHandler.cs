@@ -1,55 +1,52 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using ApplicationBook.Authors.Commands.CreateAuthor;
+﻿using ApplicationBook.Authors.Commands.CreateAuthor;
+using ApplicationBook.Common; // Add this namespace
+using ApplicationBook.Dtos;
 using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using ApplicationBook.Dtos;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, Author>
+public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, OperationResult<Author>>
 {
-    private readonly IRepository<Author> _Repository;
+    private readonly IRepository<Author> _repository;
     private readonly ILogger<CreateAuthorCommandHandler> _logger;
-   
 
-    // Konstruktor med ILogger-injektion
-    public CreateAuthorCommandHandler(IRepository<Author> eposetory, ILogger<CreateAuthorCommandHandler> logger )
+    public CreateAuthorCommandHandler(IRepository<Author> repository, ILogger<CreateAuthorCommandHandler> logger)
     {
+        _repository = repository;
         _logger = logger;
-        _Repository = _Repository;
     }
 
-    public async Task<Author> Handle(CreateAuthorCommand request, CancellationToken cancellationToken)
+    public async Task<OperationResult<Author>> Handle(CreateAuthorCommand request, CancellationToken cancellationToken)
     {
-       
-            // Log start of the process
-            _logger.LogInformation("Starting CreateAuthorCommand for {AuthorName}", request.NewAuthor.FirstName);
+        _logger.LogInformation("Starting CreateAuthorCommand for {AuthorName}", request.NewAuthor.FirstName);
 
-            
+        // Map DTO to domain entity
+        var author = new Author
+        {
+            AId = 0,
+            FirstName = request.NewAuthor.FirstName,
+            LastName = request.NewAuthor.LastName
+        };
 
-            // Map DTO to domain entity
-            var author = new Author
-            {
-                AId = 0,
-                FirstName = request.NewAuthor.FirstName,
-                LastName = request.NewAuthor.LastName
-            };
         try
         {
             // Save to the repository
-            await _Repository.CreateAsync(author);
+            await _repository.CreateAsync(author);
 
             // Log success
-            _logger.LogInformation("Successfully created author with ID {AuthorId}", author);
+            _logger.LogInformation("Successfully created author with ID {AuthorId}", author.AId);
 
-            return author;
+            return OperationResult<Author>.Successfull(author);
         }
         catch (Exception ex)
         {
             // Log exception
             _logger.LogError(ex, "Error occurred while creating an author.");
-            throw;
+            return OperationResult<Author>.Failure("An error occurred while creating the author.");
         }
     }
 }

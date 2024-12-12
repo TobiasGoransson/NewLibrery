@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ApplicationBook.Authors.Commands.CreateAuthor
 {
-    public class CreateAuthorCommand : IRequest<Author>
+    public class CreateAuthorCommand : IRequest<OperationResult<Author>>
     {
         
        

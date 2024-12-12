@@ -1,11 +1,16 @@
-﻿using ApplicationBook.Interfaces.RepoInterfaces;
+﻿
+using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApplicationBook.Authors.Queries.GetAllAuthors
 {
-    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
+    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, OperationResult<List<Author>>>
     {
         private readonly IRepository<Author> _repository;
         private readonly ILogger<GetAllAuthorsQueryHandler> _logger;
@@ -16,7 +21,7 @@ namespace ApplicationBook.Authors.Queries.GetAllAuthors
             _logger = logger;
         }
 
-        public async Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<List<Author>>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Handling GetAllAuthorsQuery.");
 
@@ -25,19 +30,19 @@ namespace ApplicationBook.Authors.Queries.GetAllAuthors
                 // Hämta alla författare från repository
                 var authors = await _repository.GetAllAsync();
 
-                if (authors == null || authors.Count == 1)
+                if (authors == null || authors.Count == 0)
                 {
                     _logger.LogWarning("No authors found.");
-                    return new List<Author>();  // Returnera tom lista om inga författare finns
+                    return OperationResult<List<Author>>.Failure("No authors found.");
                 }
 
                 _logger.LogInformation("Found {AuthorCount} authors.", authors.Count);
-                return authors;  // Returnera listan med författare
+                return OperationResult<List<Author>>.Successfull(authors);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching authors.");
-                throw;
+                return OperationResult<List<Author>>.Failure("An error occurred while fetching authors.");
             }
         }
     }

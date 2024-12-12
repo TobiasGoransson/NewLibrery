@@ -10,48 +10,52 @@ using System.Threading.Tasks;
 
 namespace ApplicationBook.Books.Commands.DeleteBook
 {
-    public class DeleteBookCommandHandler : IRequestHandler<DeleteBookCommand, List<Book>>
+    namespace ApplicationBook.Books.Commands.DeleteBook
     {
-        private readonly IRepository<Book> _repository;
-        private readonly ILogger<DeleteBookCommandHandler> _logger; // Lägg till logger
-
-        public DeleteBookCommandHandler(IRepository<Book> repository, ILogger<DeleteBookCommandHandler> logger)
+        public class DeleteBookCommandHandler : IRequestHandler<DeleteBookCommand, OperationResult<List<Book>>>
         {
-            _repository = repository;
-            _logger = logger; // Spara loggern
-        }
+            private readonly IRepository<Book> _repository;
+            private readonly ILogger<DeleteBookCommandHandler> _logger;
 
-        public async Task<List<Book>> Handle(DeleteBookCommand request, CancellationToken cancellationToken)
-        {
-            // Logga när vi börjar hantera kommandot
-            _logger.LogInformation("Handling DeleteBookCommand to delete book with ID: {BookId}", request.Id);
-
-            // Hämta boken som ska tas bort
-            var bookToDelete = await _repository.GetByIdAsync(request.Id, cancellationToken);
-
-            // Kontrollera om boken finns
-            if (bookToDelete == null)
+            public DeleteBookCommandHandler(IRepository<Book> repository, ILogger<DeleteBookCommandHandler> logger)
             {
-                _logger.LogWarning("No book found with ID: {BookId}", request.Id); // Logga varning om bok inte finns
-                throw new KeyNotFoundException($"No book found with ID {request.Id}.");
+                _repository = repository;
+                _logger = logger;
             }
 
-            // Ta bort boken
-            await _repository.DeleteByIdAsync(request.Id);
-            _logger.LogInformation("Book with ID: {BookId} has been deleted successfully.", request.Id); // Logga framgång
-
-            // Hämta och returnera den uppdaterade listan med böcker
-            var books = await _repository.GetAllAsync();
-            if (books == null || !books.Any())
+            public async Task<OperationResult<List<Book>>> Handle(DeleteBookCommand request, CancellationToken cancellationToken)
             {
-                _logger.LogWarning("No books found after deleting book with ID: {BookId}", request.Id); // Logga varning om inga böcker återstår
-            }
-            else
-            {
-                _logger.LogInformation("Retrieved updated list of books after deleting book with ID: {BookId}", request.Id); // Logga när uppdaterad lista hämtas
-            }
+                _logger.LogInformation("Handling DeleteBookCommand to delete book with ID: {BookId}", request.Id);
 
-            return books.ToList();
+                var bookToDelete = await _repository.GetByIdAsync(request.Id, cancellationToken);
+
+                if (bookToDelete == null)
+                {
+                    _logger.LogWarning("No book found with ID: {BookId}", request.Id);
+                    return OperationResult<List<Book>>.Failure($"No book found with ID {request.Id}.");
+                }
+
+                try
+                {
+                    await _repository.DeleteByIdAsync(request.Id);
+                    _logger.LogInformation("Book with ID: {BookId} has been deleted successfully.", request.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while deleting book with ID: {BookId}", request.Id);
+                    return OperationResult<List<Book>>.Failure("An error occurred while deleting the book.");
+                }
+
+                var books = await _repository.GetAllAsync();
+                if (books == null || !books.Any())
+                {
+                    _logger.LogWarning("No books found after deleting book with ID: {BookId}", request.Id);
+                    return OperationResult<List<Book>>.Failure("No books found in the repository.");
+                }
+
+                _logger.LogInformation("Retrieved updated list of books after deleting book with ID: {BookId}", request.Id);
+                return OperationResult<List<Book>>.Successfull(books);
+            }
         }
     }
 }

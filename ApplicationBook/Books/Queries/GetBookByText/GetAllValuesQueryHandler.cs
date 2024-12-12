@@ -1,41 +1,41 @@
-﻿using ApplicationBook.Interfaces.RepoInterfaces;
+﻿using ApplicationBook.Books.Queries.GetBook;
+using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace ApplicationBook.Books.Queries.GetBook
+public class GetAllValuesQueryHandler : IRequestHandler<GetAllValuesQuery, OperationResult<List<Book>>>
 {
-    public class GetAllValuesQueryHandler : IRequestHandler<GetAllValuesQuery, List<Book>>
+    private readonly IRepository<Book> _repository;
+    private readonly ILogger<GetAllValuesQueryHandler> _logger;
+
+    public GetAllValuesQueryHandler(IRepository<Book> repository, ILogger<GetAllValuesQueryHandler> logger)
     {
-        private readonly IRepository<Book> _repository;
-        private readonly ILogger<GetAllValuesQueryHandler> _logger; // Lägg till logger
+        _repository = repository;
+        _logger = logger;
+    }
 
-        public GetAllValuesQueryHandler(IRepository<Book> repository, ILogger<GetAllValuesQueryHandler> logger)
+    public async Task<OperationResult<List<Book>>> Handle(GetAllValuesQuery request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Handling GetAllValuesQuery for retrieving all books");
+
+        try
         {
-            _repository = repository;
-            _logger = logger; // Spara loggern
-        }
-
-        public async Task<List<Book>> Handle(GetAllValuesQuery request, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Handling GetAllValuesQuery for retrieving all books"); // Logga när förfrågan hanteras
-
-            // Hämta alla böcker från repositoryn
             var books = await _repository.GetAllAsync();
 
             if (books == null || books.Count == 0)
             {
-                _logger.LogWarning("No books found in the repository."); // Logga varning om inga böcker hittas
-            }
-            else
-            {
-                _logger.LogInformation("Successfully retrieved {BookCount} books from the repository.", books.Count); // Logga antal böcker som hämtades
+                _logger.LogWarning("No books found in the repository.");
+                return OperationResult<List<Book>>.Failure("No books found in the repository.");
             }
 
-            return books;
+            _logger.LogInformation("Successfully retrieved {BookCount} books from the repository.", books.Count);
+            return OperationResult<List<Book>>.Successfull(books);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving books from the repository.");
+            return OperationResult<List<Book>>.Failure("An error occurred while retrieving books.");
         }
     }
 }

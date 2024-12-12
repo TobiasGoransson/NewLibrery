@@ -26,47 +26,50 @@ public class AuthorController : ControllerBase
 
     // GET: api/author
     [HttpGet]
-    public async Task<ActionResult<List<Author>>> GetAuthors()
+    [Route("GetAllAuthors")]
+    public async Task<IActionResult> GetAllAuthors()
     {
-        _logger.LogInformation("Fetching all authors from the database.");
-        try
+        _logger.LogInformation("GetAllAuthors endpoint called.");
+
+        var result = await _mediator.Send(new GetAllAuthorsQuery());
+
+        if (result.Success)
         {
-            var query = new GetAllAuthorsQuery();
-            var authors = await _mediator.Send(query);
-
-            // Validering: Kontrollera om listan är tom
-            if (authors == null || authors.Count == 0)
-            {
-                return NoContent(); // Returnerar 204 om inga författare hittas
-            }
-
-            return Ok(authors);
+            _logger.LogInformation("Successfully retrieved authors.");
+            return Ok(result.Data); // Returnera listan över författare
         }
-        catch (Exception ex)
+        else
         {
-
-            return StatusCode(500, new { Message = "An error occurred while fetching authors.", Details = ex.Message });
-            _logger.LogError(ex, "An error occurred while fetching authors.");
+            _logger.LogWarning("Failed to retrieve authors: {ErrorMessage}", result.ErrorMessage);
+            return NotFound(new { Message = result.ErrorMessage }); // Returnera 404 om inga författare hittades
         }
     }
+
 
     // GET: api/author/{id}
     [HttpGet("{id}")]
-    public async Task<ActionResult<Author>> GetAuthorById(int id)
+    public async Task<IActionResult> GetAuthorById(int id)
     {
-        var query = new GetAuthorByIdQuery(id);
+        _logger.LogInformation("GetAuthorById endpoint called with ID: {Id}", id);
 
-        _logger.LogInformation($"Fetching author with ID {id} from the database.");
+        var result = await _mediator.Send(new GetAuthorByIdQuery(id));
 
-        var author = await _mediator.Send(query);
-        if (author == null)
+        if (result.Success)
         {
-            return NotFound(new { Message = $"Author with ID {id} was not found." });
-
-            _logger.LogWarning($"Author with ID {id} was not found.");
+            _logger.LogInformation("Successfully retrieved author with ID: {Id}", id);
+            return Ok(result.Data); // Returnera författaren
         }
-        return Ok(author);
+        else
+        {
+            _logger.LogWarning("Failed to retrieve author with ID: {Id}. Error: {ErrorMessage}", id, result.ErrorMessage);
+            if (result.ErrorMessage.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            {
+                return NotFound(new { Message = result.ErrorMessage }); // Returnera 404 vid "not found"
+            }
+            return BadRequest(new { Message = result.ErrorMessage }); // Returnera 400 vid andra fel
+        }
     }
+
 
 
 
@@ -76,27 +79,24 @@ public class AuthorController : ControllerBase
     public async Task<IActionResult> CreateAuthor([FromBody] CreateAuthorCommand command)
     {
         _logger.LogInformation("Creating a new author.");
-        try
-        { 
-        // Validera att förnamn och efternamn inte är tomma
-            if (command == null)
-            {
-            return BadRequest("Both FirstName and LastName must be provided.");
-            _logger.LogWarning("Both FirstName and LastName must be provided.");
-             }
 
-            var createdAuthor = await _mediator.Send(command);
-            return Ok(createdAuthor);
-        }
-        catch
+        if (command == null || string.IsNullOrEmpty(command.NewAuthor.FirstName) || string.IsNullOrEmpty(command.NewAuthor.LastName))
         {
-        // Om inget objekt skapas, returnera ett internt fel
-      
-            return StatusCode(500, "An error occurred while creating the author.");
-            _logger.LogError("An error occurred while creating the author.");
+            _logger.LogWarning("Both FirstName and LastName must be provided.");
+            return BadRequest("Both FirstName and LastName must be provided.");
         }
 
-        
+        var result = await _mediator.Send(command);
+
+        if (result.Success)
+        {
+            return Ok(result.Data); // Return created author if successful
+        }
+        else
+        {
+            _logger.LogError(result.ErrorMessage);
+            return StatusCode(500, result.ErrorMessage); // Return error message if failed
+        }
     }
 
 
@@ -124,57 +124,49 @@ public class AuthorController : ControllerBase
             return BadRequest("Both FirstName and LastName are required.");
         }
 
-        try
+        var result = await _mediator.Send(command);
+
+        if (result.Success)
         {
-            var updatedAuthor = await _mediator.Send(command);
-            if (updatedAuthor == null)
+            _logger.LogInformation("UpdateAuthor succeeded for ID: {Id}.", id);
+            return NoContent(); // Lyckad uppdatering
+        }
+        else
+        {
+            if (result.ErrorMessage.Contains("not found", StringComparison.OrdinalIgnoreCase))
             {
                 _logger.LogWarning("UpdateAuthor: Author with ID {Id} not found.", id);
-                return NotFound(new { Message = $"Author with ID {id} was not found." });
+                return NotFound(new { Message = result.ErrorMessage }); // Returnera 404 om författaren inte hittades
             }
 
-            _logger.LogInformation("UpdateAuthor succeeded for ID: {Id}.", id);
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred while updating Author with ID: {Id}.", id);
-            return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            _logger.LogError("UpdateAuthor failed for ID: {Id}. Error: {ErrorMessage}", id, result.ErrorMessage);
+            return StatusCode(500, result.ErrorMessage); // Returnera 500 för oväntade fel
         }
     }
+
 
     // DELETE: api/author/{id}
-    [HttpDelete("{id}")]
+    [HttpDelete]
+    [Route("DeleteAuthor/{id}")]
     public async Task<IActionResult> DeleteAuthor(int id)
     {
-        _logger.LogInformation("DeleteAuthor called with ID: {Id}.", id);
+        _logger.LogInformation("Deleting author with ID {AuthorId}.", id);
 
-        if (id <= 0)
+        var command = new DeleteAuthorCommand ( id );
+        var result = await _mediator.Send(command);
+
+        if (result.Success)
         {
-            _logger.LogWarning("DeleteAuthor failed validation: Invalid ID {Id}.", id);
-            return BadRequest("Invalid ID. ID must be a positive integer.");
+            _logger.LogInformation("Successfully deleted author with ID {AuthorId}.", id);
+            return Ok(result.Data); // Returnera den borttagna författaren
         }
-
-        var authorToRemove = new DeleteAuthorCommand(id);
-
-        try
+        else
         {
-            var result = await _mediator.Send(authorToRemove);
-            if (result == null)
-            {
-                _logger.LogWarning("DeleteAuthor: Author with ID {Id} not found.", id);
-                return NotFound(new { Message = $"Author with ID {id} was not found." });
-            }
-
-            _logger.LogInformation("DeleteAuthor succeeded for ID: {Id}.", id);
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred while deleting Author with ID: {Id}.", id);
-            return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            _logger.LogWarning(result.ErrorMessage);
+            return NotFound(result.ErrorMessage); // Returnera 404 om författaren inte hittades
         }
     }
+
 
 
 }

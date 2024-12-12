@@ -3,7 +3,7 @@ using MediatR;
 
 namespace ApplicationBook.Books.Commands.UpdateBook
 {
-    public class UpdateBookCommand : IRequest<Book>
+    public class UpdateBookCommand : IRequest<OperationResult<Book>>
     {
         public Book UpdatedBook { get; set; }
 
@@ -12,6 +12,5 @@ namespace ApplicationBook.Books.Commands.UpdateBook
             UpdatedBook = updatedBook;
         }
     }
-
-
 }
+
