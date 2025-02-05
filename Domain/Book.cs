@@ -16,21 +16,28 @@ namespace Domain
         {
 
         }
-        //public Book(string title, string genre, Author author)
-        //{
-        //    Title = title;
-        //    this.Genre = genre;
-        //    Author = author;
+        public Book(string title, string description)
+        {
+            Title = title;
+            Description = description;
+        }
+        public Book(int bId, string title, string description)
+        {
+            BId = bId;
+            Title = title;
+            Description = description;
 
 
-        //}
-        //public Book(int bId, string title, string genre, Author author)
-        //{
-        //    BId = bId;
-        //    Title = title;
-        //    Genre = genre;
-        //    Author = author;
-        //}
 
+            //}
+            //public Book(int bId, string title, string genre, Author author)
+            //{
+            //    BId = bId;
+            //    Title = title;
+            //    Genre = genre;
+            //    Author = author;
+            //}
+
+        }
     }
 }

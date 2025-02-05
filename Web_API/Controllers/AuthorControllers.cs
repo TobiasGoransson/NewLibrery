@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+
+
+
+
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +14,7 @@ using ApplicationBook.Authors.Commands.UpdateAuthor;
 using ApplicationBook.Authors.Commands.DeleteAuthor;
 using ApplicationBook.Authors.Queries.GetAllAuthors;
 using ApplicationBook.Authors.Queries.GetAuthorById;
-using ApplicationBook.Dtos;
+using Domain.Dtos;
 
 
 [Route("api/[controller]")]
@@ -41,34 +46,33 @@ public class AuthorController : ControllerBase
         else
         {
             _logger.LogWarning("Failed to retrieve authors: {ErrorMessage}", result.ErrorMessage);
-            return NotFound(new { Message = result.ErrorMessage }); // Returnera 404 om inga författare hittades
+            return new NotFoundObjectResult(new { Message = "No authors found." });
+
         }
     }
 
 
     // GET: api/author/{id}
-    [HttpGet("{id}")]
+    [HttpGet]
+    [Route("GetAuthorById/{id}")]
     public async Task<IActionResult> GetAuthorById(int id)
     {
-        _logger.LogInformation("GetAuthorById endpoint called with ID: {Id}", id);
+        _logger.LogInformation("GetAuthorById endpoint called with ID {AuthorId}.", id);
 
-        var result = await _mediator.Send(new GetAuthorByIdQuery(id));
+        var result = await _mediator.Send(new GetAuthorByIdQuery (id));
 
         if (result.Success)
         {
-            _logger.LogInformation("Successfully retrieved author with ID: {Id}", id);
-            return Ok(result.Data); // Returnera författaren
+            _logger.LogInformation("Author found: {Author}", result.Data);
+            return Ok(result.Data);
         }
         else
         {
-            _logger.LogWarning("Failed to retrieve author with ID: {Id}. Error: {ErrorMessage}", id, result.ErrorMessage);
-            if (result.ErrorMessage.Contains("not found", StringComparison.OrdinalIgnoreCase))
-            {
-                return NotFound(new { Message = result.ErrorMessage }); // Returnera 404 vid "not found"
-            }
-            return BadRequest(new { Message = result.ErrorMessage }); // Returnera 400 vid andra fel
+            _logger.LogWarning("Author not found: {ErrorMessage}", result.ErrorMessage);
+            return NotFound(result.ErrorMessage); // Return NotFoundObjectResult
         }
     }
+
 
 
 
@@ -152,7 +156,7 @@ public class AuthorController : ControllerBase
     {
         _logger.LogInformation("Deleting author with ID {AuthorId}.", id);
 
-        var command = new DeleteAuthorCommand ( id );
+        var command = new DeleteAuthorCommand(id);
         var result = await _mediator.Send(command);
 
         if (result.Success)

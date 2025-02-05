@@ -3,7 +3,7 @@ using MediatR;
 
 namespace ApplicationBook.Books.Queries.GetBook
 {
-    public class GetAllValuesQuery : IRequest<OperationResult<List<Book>>>
+    public class GetBooksQuery : IRequest<OperationResult<List<Book>>>
     {
     }
 }

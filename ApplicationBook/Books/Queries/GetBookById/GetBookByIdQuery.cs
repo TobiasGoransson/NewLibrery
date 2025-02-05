@@ -3,11 +3,11 @@ using MediatR;
 
 namespace ApplicationBook.Books.Queries.GetBookById
 {
-    public class GetValueByIdQuery : IRequest<OperationResult<Book>>
+    public class GetBookByIdQuery : IRequest<OperationResult<Book>>
     {
         public int Id { get; }
 
-        public GetValueByIdQuery(int id)
+        public GetBookByIdQuery(int id)
         {
             Id = id;
         }

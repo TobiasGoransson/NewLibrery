@@ -46,3 +46,4 @@ public class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand, Opera
             return OperationResult<Book>.Failure("An error occurred while updating the book.");
         }
     }
+}

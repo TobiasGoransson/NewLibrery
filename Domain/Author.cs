@@ -15,23 +15,19 @@
             {
 
             }
-        
-
-       
 
 
-        
-        //public Author(string firstName, string lastName)
-        //{
-        //    FirstName = firstName;
-        //    LastName = lastName;
-        //}
-        //public Author(int aId, string firstName, string lastName)
-        //{
-        //    AId = aId;
-        //    FirstName = firstName;
-        //    LastName = lastName;
-        //}
+        public Author(string firstName, string lastName)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+        }
+        public Author(int aId, string firstName, string lastName)
+        {
+            AId = aId;
+            FirstName = firstName;
+            LastName = lastName;
+        }
 
 
 

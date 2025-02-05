@@ -4,7 +4,7 @@ using Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-public class GetAllValuesQueryHandler : IRequestHandler<GetAllValuesQuery, OperationResult<List<Book>>>
+public class GetAllValuesQueryHandler : IRequestHandler<GetBooksQuery, OperationResult<List<Book>>>
 {
     private readonly IRepository<Book> _repository;
     private readonly ILogger<GetAllValuesQueryHandler> _logger;
@@ -15,9 +15,9 @@ public class GetAllValuesQueryHandler : IRequestHandler<GetAllValuesQuery, Opera
         _logger = logger;
     }
 
-    public async Task<OperationResult<List<Book>>> Handle(GetAllValuesQuery request, CancellationToken cancellationToken)
+    public async Task<OperationResult<List<Book>>> Handle(GetBooksQuery request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handling GetAllValuesQuery for retrieving all books");
+        _logger.LogInformation("Handling GetBooksQuery for retrieving all books");
 
         try
         {

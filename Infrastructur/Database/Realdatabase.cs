@@ -117,10 +117,5 @@ namespace Infrastructur.Database
             }
         }
 
-
-            
-        
-
-
     }
 }
