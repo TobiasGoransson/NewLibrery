@@ -10,6 +10,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using Microsoft.Extensions.Hosting;
+using FluentValidation.AspNetCore;
 
 namespace Web_API
 {
@@ -35,17 +36,22 @@ namespace Web_API
             //        columnOptions: columnOptions)
             //    .CreateLogger();
 
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Lägg till loggning och Serilog
             builder.Logging.ClearProviders();
             builder.Logging.AddSerilog();
 
+            //Lägg till FluentValidation
+            builder.Services.AddFluentValidationAutoValidation()
+                .AddFluentValidationClientsideAdapters();
+                
+
             // Lägg till tjänster
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-            builder.Services.AddDbContext<Realdatabase>(options =>
-                options.UseSqlServer(connectionString));
+            builder.Services.AddDbContext<Realdatabase>(options => options.UseSqlServer(connectionString));
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(connectionString);
 

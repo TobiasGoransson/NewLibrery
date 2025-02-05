@@ -1,5 +1,5 @@
 ﻿using ApplicationBook.Users.Commands.RegisterNewUser;
-using ApplicationBook.Dtos;
+using Domain.Dtos;
 using ApplicationBook.Users.Queries.GetAllUsers;
 using ApplicationBook.Users.Queries.LogIn;
 using MediatR;

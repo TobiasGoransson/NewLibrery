@@ -1,15 +1,15 @@
-﻿using ApplicationBook.Authors.Commands.CreateAuthor;
-using ApplicationBook.Common; // Add this namespace
-using ApplicationBook.Dtos;
+﻿
+using ApplicationBook.Authors.Commands.CreateAuthor;
 using ApplicationBook.Interfaces.RepoInterfaces;
 using Domain;
+using Domain.Dtos;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, OperationResult<Author>>
+public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, OperationResult<AuthorDtoWithId>>
 {
     private readonly IRepository<Author> _repository;
     private readonly ILogger<CreateAuthorCommandHandler> _logger;
@@ -20,14 +20,13 @@ public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, O
         _logger = logger;
     }
 
-    public async Task<OperationResult<Author>> Handle(CreateAuthorCommand request, CancellationToken cancellationToken)
+    public async Task<OperationResult<AuthorDtoWithId>> Handle(CreateAuthorCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting CreateAuthorCommand for {AuthorName}", request.NewAuthor.FirstName);
 
         // Map DTO to domain entity
         var author = new Author
         {
-            AId = 0,
             FirstName = request.NewAuthor.FirstName,
             LastName = request.NewAuthor.LastName
         };
@@ -37,16 +36,20 @@ public class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, O
             // Save to the repository
             await _repository.CreateAsync(author);
 
-            // Log success
-            _logger.LogInformation("Successfully created author with ID {AuthorId}", author.AId);
+            // Map the domain entity back to a DTO
+            var authorDtoWithId = new AuthorDtoWithId(author.AId, author.FirstName, author.LastName);
+           
 
-            return OperationResult<Author>.Successfull(author);
+            // Log success
+            _logger.LogInformation("Successfully created author with ID {AuthorId}", author);
+
+            return OperationResult<AuthorDtoWithId>.Successfull(authorDtoWithId); // Return AuthorDto instead of Autho
         }
         catch (Exception ex)
         {
             // Log exception
             _logger.LogError(ex, "Error occurred while creating an author.");
-            return OperationResult<Author>.Failure("An error occurred while creating the author.");
+            return OperationResult<AuthorDtoWithId>.Failure("An error occurred while creating the author.");
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Infrastructur
         {
             services.AddDbContext<Realdatabase>(options =>
             {
-                options.UseSqlServer("Server=MSI\\SQLEXPRESS;Database=TobyServer;Trusted_Connection=true;TrustServerCertificate=True;");
+                options.UseSqlServer(connectionString);
             });
 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

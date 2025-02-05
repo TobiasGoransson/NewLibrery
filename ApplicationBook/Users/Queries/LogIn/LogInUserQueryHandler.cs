@@ -1,6 +1,5 @@
 ﻿using ApplicationBook.Interfaces.RepoInterfaces;
 using ApplicationBook.Users.Queries.LogIn.Helpers;
-using ApplicationBook.OperationResults; // Importera OperationResult
 using Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;

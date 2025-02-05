@@ -7,6 +7,7 @@ using ApplicationBook.Books.Queries.GetBookById;
 using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Domain.Dtos;
 
 namespace Web_API.Controllers
 {
@@ -29,7 +30,7 @@ namespace Web_API.Controllers
         {
             _logger.LogInformation("Fetching all books...");
 
-            var operationResult = await _mediator.Send(new GetAllValuesQuery());
+            var operationResult = await _mediator.Send(new GetBooksQuery());
 
             if (!operationResult.Success)
             {
@@ -38,28 +39,28 @@ namespace Web_API.Controllers
             }
 
             _logger.LogInformation("Fetched {Count} books successfully.", operationResult.Data.Count);
-            return Ok(new { Message = operationResult.Message, Data = operationResult.Data });
+            return Ok( operationResult.Data );
         }
 
         // GET: api/Books/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetBookById(int id)
         {
 
             try
             {
-                var operationResult = _mediator.Send(new GetValueByIdQuery(id)).Result;
+                var operationResult = _mediator.Send(new GetBookByIdQuery(id)).Result;
                 _logger.LogInformation("Fetching book with ID: {Id}", id);
 
                 if (operationResult.Success)
                 {
                     _logger.LogInformation("Book with ID {Id} fetched successfully.", id);
-                    return Ok(new { message = operationResult.Message, data = operationResult.Data });
+                    return Ok(operationResult.Data );
                 }
                 else
                 {
                     _logger.LogWarning("Invalid ID provided: {Id}", id);
-                    return BadRequest(new { message = operationResult.Message, errors = operationResult.ErrorMessage });
+                    return BadRequest(new {   operationResult.ErrorMessage });
 
                 }
             }
@@ -74,7 +75,7 @@ namespace Web_API.Controllers
 
         // POST api/<BookController>
         [HttpPost]
-        public async Task<IActionResult> CreateNewBook([FromBody] Book bookToAdd)
+        public async Task<IActionResult> CreateNewBook([FromBody] BookDto bookToAdd)
         {
             _logger.LogInformation("Creating a new book...");
 
@@ -90,12 +91,6 @@ namespace Web_API.Controllers
                 return BadRequest(new { Message = "The book title and description are required." });
             }
 
-            if (bookToAdd.Author == null)
-            {
-                _logger.LogWarning("Invalid book data: Missing author.");
-                return BadRequest(new { Message = "The book must have an author." });
-            }
-
             var operationResult = await _mediator.Send(new CreateBookCommand(bookToAdd));
 
             if (!operationResult.Success)
@@ -105,7 +100,7 @@ namespace Web_API.Controllers
             }
 
             _logger.LogInformation("Book created successfully.");
-            return Ok(new { Message = operationResult.Message, Data = operationResult.Data });
+            return Ok(operationResult.Data);
         }
 
         // PUT api/<BookController>/5
@@ -142,12 +137,16 @@ namespace Web_API.Controllers
 
             if (!operationResult.Success)
             {
-                _logger.LogWarning("Failed to delete book with ID: {Id}. Error: {Error}", id, operationResult.ErrorMessage);
-                return BadRequest(new { Message = operationResult.ErrorMessage });
+                if (operationResult.ErrorMessage.Contains("No book found"))
+                {
+                    return NotFound(new { message = operationResult.ErrorMessage });
+                }
+               
             }
 
             _logger.LogInformation("Book with ID {Id} deleted successfully.", id);
-            return Ok(new { Message = operationResult.Message, Data = operationResult.Data });
+            return Ok(operationResult.Data);
         }
+
     }
 }

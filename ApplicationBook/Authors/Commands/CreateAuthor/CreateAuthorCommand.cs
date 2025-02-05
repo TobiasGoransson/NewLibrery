@@ -1,12 +1,12 @@
-﻿using ApplicationBook.Dtos;
-using Domain;
+﻿using Domain;
+using Domain.Dtos;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
 
 
 namespace ApplicationBook.Authors.Commands.CreateAuthor
 {
-    public class CreateAuthorCommand : IRequest<OperationResult<Author>>
+    public class CreateAuthorCommand : IRequest<OperationResult<AuthorDtoWithId>>
     {
         
        

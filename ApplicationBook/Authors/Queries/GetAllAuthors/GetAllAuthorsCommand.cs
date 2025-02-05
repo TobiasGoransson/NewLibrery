@@ -1,4 +1,5 @@
-﻿using Domain;
+﻿
+using Domain;
 using MediatR;
 
 namespace ApplicationBook.Authors.Queries.GetAllAuthors

@@ -1,4 +1,4 @@
-﻿using ApplicationBook.Dtos; // Importera OperationResult
+﻿using Domain.Dtos; // Importera OperationResult
 using Domain;
 using MediatR;
 
